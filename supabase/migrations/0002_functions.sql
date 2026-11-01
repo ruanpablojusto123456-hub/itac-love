@@ -19,7 +19,7 @@ language sql stable as $$
 $$;
 
 create or replace function public.sha256_hex(v text) returns text
-language sql immutable as $$ select encode(digest(v, 'sha256'), 'hex') $$;
+language sql immutable as $$ select encode(extensions.digest(v, 'sha256'), 'hex') $$;
 
 -- Normaliza número de documento (só letras e números, maiúsculo)
 create or replace function public.doc_hash(v text) returns text

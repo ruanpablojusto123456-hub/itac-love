@@ -4,7 +4,7 @@
 -- Depois rode 0002_functions.sql, 0003_policies.sql e 0004_cron.sql.
 -- =====================================================================
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
 -- ---------------------------------------------------------------------
 -- Configurações globais (editáveis no painel admin, sem atualizar o app)
@@ -323,7 +323,7 @@ create table if not exists public.safe_dates (
   last_lat         double precision,
   last_lng         double precision,
   last_location_at timestamptz,
-  share_token      text not null default encode(gen_random_bytes(16), 'hex') unique,
+  share_token      text not null default encode(extensions.gen_random_bytes(16), 'hex') unique,
   created_at       timestamptz not null default now(),
   check (ends_at > starts_at)
 );
