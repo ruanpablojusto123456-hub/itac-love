@@ -1,0 +1,6 @@
+{
+  "appId": "br.com.itaclove.app",
+  "appName": "ITAC LOVE",
+  "webDir": "dist",
+  "android": { "allowMixedContent": false }
+}
