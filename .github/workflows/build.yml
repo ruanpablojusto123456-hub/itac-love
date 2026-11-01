@@ -1,0 +1,79 @@
+# Gera o APK Android e publica a versão web no GitHub Pages a cada push na branch main.
+# Configure em Settings > Secrets and variables > Actions:
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY            (obrigatórios para o modo real)
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
+#   ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD              (opcionais: APK assinado de produção)
+name: Build ITAC LOVE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci
+      - name: Versão do app (package.json)
+        run: echo "VITE_APP_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+      - run: npm run build
+      - name: Gerar projeto Android (Capacitor) e personalizar
+        run: |
+          pip install pillow
+          npx cap add android
+          python3 scripts/patch_android.py
+      - run: npx cap sync android
+      - name: Gerar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+            ./gradlew assembleRelease
+            BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+            $BT/zipalign -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+            $BT/apksigner sign --ks release.keystore --ks-pass pass:${{ secrets.ANDROID_KEYSTORE_PASSWORD }} \
+              --ks-key-alias ${{ secrets.ANDROID_KEY_ALIAS }} --key-pass pass:${{ secrets.ANDROID_KEY_PASSWORD }} \
+              --out ../itac-love.apk aligned.apk
+          else
+            ./gradlew assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk ../itac-love.apk
+          fi
+      - uses: actions/upload-artifact@v4
+        with: { name: itac-love-apk, path: itac-love.apk }
+      - name: Publicar na página de Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VITE_APP_VERSION }}-${{ github.run_number }}
+          name: ITAC LOVE ${{ env.VITE_APP_VERSION }} (build ${{ github.run_number }})
+          files: itac-love.apk
+
+  web:
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    environment: { name: github-pages, url: "${{ steps.deploy.outputs.page_url }}" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci && npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+      - id: deploy
+        uses: actions/deploy-pages@v4
