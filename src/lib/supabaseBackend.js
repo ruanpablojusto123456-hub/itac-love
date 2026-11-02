@@ -12,19 +12,26 @@ const NATIVE_REDIRECT = 'br.com.itaclove.app://login-callback'
 export function createSupabaseBackend(url, anonKey) {
   const sb = createClient(url, anonKey, { auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
   const listeners = new Set()
-  const emit = () => listeners.forEach(fn => fn())
+  // Agrupa vários eventos seguidos em uma única atualização (evita tempestade de requisições)
+  let emitTimer = null
+  const emit = () => { clearTimeout(emitTimer); emitTimer = setTimeout(() => listeners.forEach(fn => fn()), 400) }
   let channel = null
+  let channelUser = null
+  let adminCache = { uid: null, value: false }
   const urlCache = new Map()
 
   async function uidOrThrow() {
-    const { data } = await sb.auth.getUser()
-    if (!data.user) throw new Error('NAO_AUTENTICADO')
-    return data.user.id
+    const { data } = await sb.auth.getSession()   // local, sem ida ao servidor
+    const id = data.session?.user?.id
+    if (!id) throw new Error('NAO_AUTENTICADO')
+    return id
   }
   const check = ({ data, error }) => { if (error) throw error; return data }
 
   function subscribe(userId) {
-    if (channel) sb.removeChannel(channel)
+    if (userId === channelUser) return
+    channelUser = userId || null
+    if (channel) { sb.removeChannel(channel); channel = null }
     if (!userId) return
     channel = sb.channel('me-' + userId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` }, emit)
@@ -34,16 +41,32 @@ export function createSupabaseBackend(url, anonKey) {
       .subscribe()
   }
 
-  sb.auth.onAuthStateChange((_e, session) => { subscribe(session?.user?.id); emit() })
+  sb.auth.onAuthStateChange((event, session) => {
+    // A troca automática de token não muda nada na tela: não recarrega
+    if (event === 'TOKEN_REFRESHED') return
+    // Depois de sair do callback (setTimeout) para não travar o cliente de auth
+    setTimeout(() => { subscribe(session?.user?.id); emit() }, 0)
+  })
 
-  // Retorno do login Google no APK (deep link)
+  // Retorno do login Google no APK (deep link). Cada código só pode ser usado uma vez.
+  const usedCodes = new Set()
+  async function handleDeepLink(link) {
+    if (!link || !link.startsWith(NATIVE_REDIRECT)) return
+    try { await Browser.close() } catch { /* no Android o Chrome fecha sozinho */ }
+    const u = new URL(link.replace(NATIVE_REDIRECT, 'https://x/cb').replace('#', '?'))
+    const code = u.searchParams.get('code')
+    const err = u.searchParams.get('error_description')
+    if (err) { console.error('Login Google:', err); return }
+    if (!code || usedCodes.has(code)) return
+    usedCodes.add(code)
+    const { error } = await sb.auth.exchangeCodeForSession(code)
+    if (error) console.error('Login Google:', error.message)
+    emit()
+  }
   if (isNative()) {
-    App.addListener('appUrlOpen', async ({ url: link }) => {
-      if (!link.startsWith(NATIVE_REDIRECT)) return
-      const code = new URL(link.replace(NATIVE_REDIRECT, 'https://x/cb')).searchParams.get('code')
-      if (code) await sb.auth.exchangeCodeForSession(code)
-      try { await Browser.close() } catch { /* já fechado */ }
-    })
+    App.addListener('appUrlOpen', ({ url: link }) => handleDeepLink(link))
+    // App aberto "a frio" pelo link de retorno
+    App.getLaunchUrl().then(r => handleDeepLink(r?.url)).catch(() => {})
   }
 
   async function signed(bucket, path) {
@@ -62,6 +85,7 @@ export function createSupabaseBackend(url, anonKey) {
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn) },
 
     async getSessionUser() { const { data } = await sb.auth.getSession(); const u = data.session?.user; return u ? { id: u.id, email: u.email } : null },
+    onDeepLink: handleDeepLink,
     async signUpEmail(email, password) {
       const data = check(await sb.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: isNative() ? NATIVE_REDIRECT : window.location.origin + window.location.pathname } }))
       if (!data.session) throw new Error('Enviamos um e-mail de confirmação. Confirme e depois entre com sua senha.')
@@ -265,7 +289,15 @@ export function createSupabaseBackend(url, anonKey) {
     },
 
     // ------------------------------------------------------------ ADMIN
-    async isAdmin() { const { data } = await sb.rpc('is_admin'); return !!data },
+    async isAdmin() {
+      const id = (await sb.auth.getSession()).data.session?.user?.id
+      if (!id) return false
+      if (adminCache.uid === id) return adminCache.value
+      const { data, error } = await sb.rpc('is_admin')
+      if (error) return false
+      adminCache = { uid: id, value: !!data }
+      return adminCache.value
+    },
     async adminListPending() {
       const rows = check(await sb.from('verifications').select('*, profile:profiles(*)').eq('status', 'pending').order('created_at'))
       const ids = rows.map(r => r.user_id)
