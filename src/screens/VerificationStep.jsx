@@ -79,12 +79,12 @@ export default function VerificationStep() {
           <p className="text-ink-soft mt-2">Para manter o <b>ITAC LOVE</b> livre de perfis falsos e golpes, tire uma selfie segurando seu <b>RG ou CNH</b> ao lado do rosto. Uma pessoa da moderação confere e libera seu acesso.</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
+        <div className="bg-card rounded-2xl p-4 shadow-sm">
           <div className="flex justify-between items-center mb-3"><span className="font-semibold">Como posicionar sua foto</span><span className="rounded-full bg-primary-fixed text-primary text-[12px] font-bold px-2.5 py-1">Exemplo correto</span></div>
           {preview ? (
             <div className="relative">
               <img src={preview} alt="Sua selfie com documento" className="w-full rounded-xl object-contain max-h-80 bg-surface-low" />
-              <button onClick={() => setBlob(null)} className="absolute top-2 right-2 bg-white/90 rounded-full p-2 shadow" aria-label="Descartar foto"><X className="w-5 h-5" /></button>
+              <button onClick={() => setBlob(null)} className="absolute top-2 right-2 bg-card/90 rounded-full p-2 shadow" aria-label="Descartar foto"><X className="w-5 h-5" /></button>
             </div>
           ) : <ExampleIllustration />}
           <ul className="mt-4 space-y-3 text-[14px]">

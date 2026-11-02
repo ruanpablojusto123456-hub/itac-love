@@ -118,7 +118,7 @@ export default function ProfileStep() {
               const on = g.id === 'todos' ? f.show_genders.length === 3 : f.show_genders.includes(g.id)
               return (
                 <button key={g.id} type="button" onClick={() => toggleShow(g.id)} aria-pressed={on}
-                  className={`flex items-center gap-3 rounded-xl border p-3.5 text-left text-[14px] font-semibold transition ${on ? 'border-primary bg-primary-fixed/40' : 'border-ink-line/50 bg-white'}`}>
+                  className={`flex items-center gap-3 rounded-xl border p-3.5 text-left text-[14px] font-semibold transition ${on ? 'border-primary bg-primary-fixed/40' : 'border-ink-line/50 bg-card'}`}>
                   <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${on ? 'bg-primary text-white' : 'border-2 border-ink-line'}`}>{on && <Check className="w-4 h-4" />}</span>{g.label}
                 </button>)
             })}
@@ -131,7 +131,7 @@ export default function ProfileStep() {
             {LOOKING_FOR.map(l => { const I = ICONS[l.icon]; const on = f.looking_for === l.id
               return (
                 <button key={l.id} type="button" onClick={() => set('looking_for', l.id)} aria-pressed={on}
-                  className={`rounded-2xl p-4 text-left transition border-2 ${on ? 'bg-secondary-fixed/70 border-secondary/40 shadow-md' : 'bg-white border-transparent shadow-sm'}`}>
+                  className={`rounded-2xl p-4 text-left transition border-2 ${on ? 'bg-secondary-fixed/70 border-secondary/40 shadow-md' : 'bg-card border-transparent shadow-sm'}`}>
                   <I className={`w-6 h-6 ${on ? 'text-secondary' : 'text-primary'}`} />
                   <div className="mt-2 font-display font-semibold text-[17px] leading-tight">{l.label}</div>
                   <div className="text-[13px] text-ink-soft mt-0.5">{l.desc}</div>

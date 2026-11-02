@@ -25,10 +25,10 @@ export default function Waiting() {
 
   const st = profile.status
   const view = {
-    pending_review: { icon: ShieldCheck, badge: 'Status: Em análise pelos moderadores', tone: 'bg-amber/20 text-[#7a4d00]', dot: 'bg-amber', title: 'Estamos conferindo seus dados!', text: <>Nossa equipe está verificando sua selfie e documento para manter a comunidade do <b className="text-primary">ITAC LOVE</b> segura. Isso costuma levar <b className="text-secondary">até 24 horas</b>.</> },
-    needs_new_photo: { icon: Camera, badge: 'Status: Nova foto necessária', tone: 'bg-amber/20 text-[#7a4d00]', dot: 'bg-amber', title: 'Precisamos de uma nova selfie', text: <>A moderação pediu uma nova foto: <b>{profile.rejection_reason}</b></> },
+    pending_review: { icon: ShieldCheck, badge: 'Status: Em análise pelos moderadores', tone: 'bg-amber/20 text-amber-ink', dot: 'bg-amber', title: 'Estamos conferindo seus dados!', text: <>Nossa equipe está verificando sua selfie e documento para manter a comunidade do <b className="text-primary">ITAC LOVE</b> segura. Isso costuma levar <b className="text-secondary">até 24 horas</b>.</> },
+    needs_new_photo: { icon: Camera, badge: 'Status: Nova foto necessária', tone: 'bg-amber/20 text-amber-ink', dot: 'bg-amber', title: 'Precisamos de uma nova selfie', text: <>A moderação pediu uma nova foto: <b>{profile.rejection_reason}</b></> },
     rejected: { icon: XCircle, badge: 'Status: Verificação reprovada', tone: 'bg-secondary-fixed text-secondary', dot: 'bg-secondary', title: 'Sua verificação não foi aprovada', text: <>Motivo: <b>{profile.rejection_reason}</b>. Você pode corrigir os dados e enviar novamente.</> },
-    under_review: { icon: ShieldAlert, badge: 'Status: Conta em revisão', tone: 'bg-amber/20 text-[#7a4d00]', dot: 'bg-amber', title: 'Sua conta está em revisão', text: 'Recebemos sinais que precisam ser conferidos pela moderação. Enquanto isso, o acesso fica pausado.' },
+    under_review: { icon: ShieldAlert, badge: 'Status: Conta em revisão', tone: 'bg-amber/20 text-amber-ink', dot: 'bg-amber', title: 'Sua conta está em revisão', text: 'Recebemos sinais que precisam ser conferidos pela moderação. Enquanto isso, o acesso fica pausado.' },
     suspended: { icon: PauseCircle, badge: 'Status: Conta suspensa', tone: 'bg-secondary-fixed text-secondary', dot: 'bg-secondary', title: 'Conta suspensa temporariamente', text: <>Sua conta foi suspensa por violar as regras da comunidade{profile.suspended_until ? <> até <b>{new Date(profile.suspended_until).toLocaleString('pt-BR')}</b></> : ''}.</> },
     banned: { icon: Ban, badge: 'Status: Conta banida', tone: 'bg-secondary-fixed text-secondary', dot: 'bg-secondary', title: 'Conta banida', text: 'Esta conta foi banida permanentemente por violar os Termos de Uso do ITAC LOVE.' },
   }[st] || {}
@@ -38,9 +38,9 @@ export default function Waiting() {
     <div className="min-h-screen px-4 pb-10">
       <div className="max-w-xl mx-auto pt-8 text-center">
         <div className="mx-auto w-48 h-48 rounded-full bg-primary-fixed/30 flex items-center justify-center">
-          <div className="w-36 h-36 rounded-full bg-white shadow-[0_0_0_10px_rgba(255,218,219,.5)] flex items-center justify-center relative">
+          <div className="w-36 h-36 rounded-full bg-card shadow-[0_0_0_10px_rgba(255,218,219,.5)] flex items-center justify-center relative">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center"><Icon className="w-11 h-11 text-white" /></div>
-            {st === 'pending_review' && <span className="absolute bottom-5 right-5 w-9 h-9 rounded-full bg-white shadow flex items-center justify-center"><Hourglass className="w-5 h-5 text-secondary animate-pulse" /></span>}
+            {st === 'pending_review' && <span className="absolute bottom-5 right-5 w-9 h-9 rounded-full bg-card shadow flex items-center justify-center"><Hourglass className="w-5 h-5 text-secondary animate-pulse" /></span>}
           </div>
         </div>
         <span className={`mt-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[14px] font-semibold ${view.tone}`}><span className={`w-2.5 h-2.5 rounded-full ${view.dot} ${st === 'pending_review' ? 'animate-pulse' : ''}`} />{view.badge}</span>
@@ -60,7 +60,7 @@ export default function Waiting() {
         )}
 
         {st === 'pending_review' && notif !== 'granted' && notif !== 'unsupported' && (
-          <button onClick={async () => setNotif(await askNotify())} className="mt-4 w-full flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm text-left">
+          <button onClick={async () => setNotif(await askNotify())} className="mt-4 w-full flex items-center gap-4 rounded-2xl bg-card p-4 shadow-sm text-left">
             <span className="w-12 h-12 rounded-full bg-tertiary-fixed/60 flex items-center justify-center shrink-0"><Bell className="w-6 h-6 text-tertiary" /></span>
             <span className="flex-1"><b className="block">Quero ser avisado(a)</b><span className="text-[14px] text-ink-soft">Ative as notificações para saber assim que for aprovado.</span></span>
           </button>

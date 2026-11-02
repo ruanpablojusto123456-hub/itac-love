@@ -58,8 +58,8 @@ export default function PhotosStep() {
                     <PhotoImg path={ph.path} className="w-full h-full object-cover" alt={`Foto ${pos}`} />
                     <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-tertiary text-white flex items-center justify-center"><Check className="w-4 h-4" /></div>
                     <div className="absolute bottom-0 inset-x-0 flex justify-center gap-2 p-2 bg-gradient-to-t from-black/60">
-                      <button onClick={() => choose(pos)} aria-label="Trocar foto" className="p-2 rounded-full bg-white/90 text-ink"><Camera className="w-4 h-4" /></button>
-                      <button onClick={() => remove(pos)} aria-label="Remover foto" className="p-2 rounded-full bg-white/90 text-secondary"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => choose(pos)} aria-label="Trocar foto" className="p-2 rounded-full bg-card/90 text-ink"><Camera className="w-4 h-4" /></button>
+                      <button onClick={() => remove(pos)} aria-label="Remover foto" className="p-2 rounded-full bg-card/90 text-secondary"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </div>
                 ) : (
@@ -68,7 +68,7 @@ export default function PhotosStep() {
                   </button>
                 )}
                 {pos === 1 && <span className="absolute -top-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-secondary text-white text-[11px] font-bold px-2 py-0.5 shadow"><Star className="w-3 h-3" />Principal</span>}
-                {busy === pos && <div className="absolute inset-0 rounded-2xl bg-white/70 flex items-center justify-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
+                {busy === pos && <div className="absolute inset-0 rounded-2xl bg-card/70 flex items-center justify-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}
               </div>)
           })}
         </div>
@@ -78,7 +78,7 @@ export default function PhotosStep() {
           <span className={`font-bold text-[14px] ${count === 3 ? 'text-tertiary' : 'text-ink-soft'}`}>{count}/3 fotos</span>
         </div>
 
-        <div className="rounded-2xl bg-white p-5 shadow-sm space-y-3">
+        <div className="rounded-2xl bg-card p-5 shadow-sm space-y-3">
           <div className="font-display font-semibold text-[17px]">Dicas para fotos que dão match</div>
           {[[UserRound, 'Rosto visível e sozinho(a) em pelo menos uma foto', 'text-tertiary'], [Sun, 'Boa iluminação, de preferência luz natural', 'text-tertiary'], [Ban, 'Nada de fotos de outras pessoas, celebridades ou da internet', 'text-secondary']].map(([I, t, c]) => (
             <div key={t} className="flex gap-3 text-[14px]"><I className={`w-5 h-5 shrink-0 ${c}`} />{t}</div>))}
@@ -94,8 +94,8 @@ export default function PhotosStep() {
 
       {/* Escolha de origem na web */}
       {sheet > 0 && (
-        <div className="fixed inset-0 z-40 bg-ink/40 flex items-end sm:items-center justify-center" onClick={() => setSheet(0)}>
-          <div className="bg-white w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-3 animate-pop safe-bottom" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-40 bg-black/40 flex items-end sm:items-center justify-center" onClick={() => setSheet(0)}>
+          <div className="bg-card w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl p-5 space-y-3 animate-pop safe-bottom" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center"><span className="font-display font-semibold text-[18px]">Foto {sheet}</span><button onClick={() => setSheet(0)} aria-label="Fechar"><X className="w-6 h-6" /></button></div>
             <Button variant="ocean" className="w-full" onClick={() => { target.current = sheet; setSheet(0); fileRef.current.click() }}><Upload className="w-5 h-5" />Enviar arquivo</Button>
             <Button variant="outline" className="w-full" onClick={() => { setCam(sheet); setSheet(0) }}><Camera className="w-5 h-5" />Usar a câmera / webcam</Button>

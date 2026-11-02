@@ -53,7 +53,7 @@ export default function Login() {
           <div className="grid grid-cols-2 bg-surface-mid rounded-xl p-1 mb-5" role="tablist">
             {[['entrar', 'Entrar'], ['criar', 'Criar Conta']].map(([id, label]) => (
               <button key={id} role="tab" aria-selected={tab === id} onClick={() => { setTab(id); setError(''); setInfo('') }}
-                className={`py-2.5 rounded-lg font-display font-semibold text-[16px] transition ${tab === id ? 'bg-white text-primary shadow' : 'text-ink-soft'}`}>{label}</button>
+                className={`py-2.5 rounded-lg font-display font-semibold text-[16px] transition ${tab === id ? 'bg-card text-primary shadow' : 'text-ink-soft'}`}>{label}</button>
             ))}
           </div>
 

@@ -29,7 +29,7 @@ export default function InterestsStep() {
           <h1 className="text-[26px] font-bold leading-tight">Do que você curte?</h1>
           <p className="text-ink-soft mt-1">Escolha no mínimo <b>3 tags</b>. Elas calculam a <span className="text-violet font-semibold">afinidade</span> com outras pessoas e aparecem em destaque quando vocês têm algo em comum.</p>
         </div>
-        <div className="sticky top-[124px] z-10 flex items-center gap-2 rounded-full bg-white shadow-sm px-4 py-2 w-fit text-[14px] font-semibold">
+        <div className="sticky top-[124px] z-10 flex items-center gap-2 rounded-full bg-card shadow-sm px-4 py-2 w-fit text-[14px] font-semibold">
           <Sparkles className="w-4 h-4 text-violet" /><span className={sel.length >= 3 ? 'text-tertiary' : 'text-ink-soft'}>{sel.length} selecionada{sel.length !== 1 ? 's' : ''}</span><span className="text-ink-mute">· mín. 3</span>
         </div>
         {!tags ? <Spinner /> : TAG_CATEGORIES.map(c => (
