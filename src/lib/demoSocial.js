@@ -1,7 +1,8 @@
 // Modo demonstração — feed, match, convites, chat, segurança, encontro seguro, Pix e moderação.
 // Espelha as funções do banco (0002_functions.sql).
 import { ageFrom } from './constants'
-import { seedById } from './demoSeeds'
+import { seedById, SEED_PROFILES } from './demoSeeds'
+import { blobToDataURL, toJpeg } from './image'
 
 export const genderGroup = (g) => ['mulher_cis', 'mulher_trans', 'travesti'].includes(g) ? 'mulheres' : ['homem_cis', 'homem_trans'].includes(g) ? 'homens' : 'nao_binarios'
 const brDay = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d)
@@ -66,7 +67,7 @@ export function createDemoSocial(I) {
     return {
       id: p.id, name: p.name, age: ageFrom(p.birth_date), city: p.city, bio: p.bio, looking_for: p.looking_for,
       gender_identity: p.gender_identity, gender_other: p.gender_other, verified: p.verified, distance_km: p.km ?? null,
-      affinity: affinity(meId, p.id), tags: tagsOf(p.id), common_tags: tagsOf(p.id).filter(t => mine.includes(t)), photos: photosOf(p.id),
+      affinity: affinity(meId, p.id), tags: tagsOf(p.id), common_tags: tagsOf(p.id).filter(t => mine.includes(t)), photos: photosOf(p.id), prompts: p.prompts || [],
     }
   }
   function sysMsg(convId, body) { load().messages.push({ id: uid(), conversation_id: convId, sender_id: null, kind: 'system', body, created_at: now(), read_at: null, expires_at: null }) }
@@ -228,7 +229,7 @@ export function createDemoSocial(I) {
         return {
           conversation_id: c.id, match_id: c.match_id, other_id: o.id, other_name: o.name, other_photo: photosOf(o.id)[0], other_verified: o.verified,
           expires_at: m?.expires_at || null, first_message_at: m?.first_message_at || null, self_destruct_seconds: c.self_destruct_seconds,
-          last_body: last?.body || null, last_at: last?.created_at || null, created_at: c.created_at,
+          last_body: last ? (last.media_type === 'image' ? '📷 Foto' : last.media_type === 'audio' ? '🎤 Áudio' : last.body) : null, last_at: last?.created_at || null, created_at: c.created_at,
           unread: msgs.filter(x => x.sender_id === o.id && !x.read_at).length,
         }
       }).filter(Boolean).sort((a, b) => (b.last_at || b.created_at).localeCompare(a.last_at || a.created_at))
@@ -261,6 +262,44 @@ export function createDemoSocial(I) {
     async reportScreenshot(convId) {
       const me = approvedMe(); const c = myConv(convId, me.id); if (c.closed_at) return
       sysMsg(convId, `${me.name} tentou tirar um print desta conversa.`); save()
+    },
+    // ---------------------------------------------------- MÍDIA NO CHAT
+    async sendMedia(convId, blob, { type, viewOnce = false, duration = null } = {}) {
+      const me = approvedMe(); const c = myConv(convId, me.id); const db = load()
+      if (c.closed_at) throw new Error('CONVERSA_ENCERRADA')
+      const data = type === 'image' ? await blobToDataURL(await toJpeg(blob, 900, 0.72)) : await blobToDataURL(blob)
+      const path = `chat/${convId}/${uid()}.${type === 'image' ? 'jpg' : 'webm'}`
+      db.files[path] = data
+      db.messages.push({ id: uid(), conversation_id: convId, sender_id: me.id, kind: 'text', body: '', media_type: type, media_path: path,
+        view_once: type === 'image' && !!viewOnce, viewed_at: null, duration_sec: duration, created_at: now(), read_at: null,
+        expires_at: c.self_destruct_seconds ? new Date(Date.now() + c.self_destruct_seconds * 1000).toISOString() : null })
+      const m = db.matches.find(x => x.id === c.match_id); if (m && !m.first_message_at) m.first_message_at = now()
+      save(); scheduleReply(convId, other(c, me.id))
+      // o perfil de exemplo "abre" a foto de visualização única
+      if (viewOnce && seedById(other(c, me.id))) setTimeout(() => { const d = load(); const msg = d.messages.find(x => x.media_path === path); if (msg) { msg.viewed_at = now(); delete d.files[path]; save() } }, 2500)
+    },
+    async mediaUrl(path) { return path ? load().files[path] || null : null },
+    async openViewOnce(msgId) {
+      const me = approvedMe(); const db = load(); const m = db.messages.find(x => x.id === msgId)
+      if (!m) throw new Error('NAO_PARTICIPANTE')
+      myConv(m.conversation_id, me.id)
+      if (!m.view_once) return db.files[m.media_path]
+      if (m.sender_id === me.id) throw new Error('SO_DESTINATARIO')
+      if (m.viewed_at) throw new Error('JA_VISUALIZADA')
+      const url = db.files[m.media_path]
+      m.viewed_at = now(); m.read_at ||= now(); save()
+      return url
+    },
+    async finishViewOnce(msgId) { const db = load(); const m = db.messages.find(x => x.id === msgId); if (m?.view_once && m.viewed_at) { delete db.files[m.media_path]; save() } },
+    // ------------------------------------------- QUEM CURTIU VOCÊ (VIP)
+    async whoLikedMe() {
+      const me = approvedMe(); const db = load()
+      const vip = !!(me.vip_until && new Date(me.vip_until) > new Date())
+      const myG = genderGroup(me.gender_identity)
+      const ids = new Set(db.likes.filter(l => l.to === me.id && l.kind === 'like').map(l => l.from))
+      SEED_PROFILES.forEach(sp => { const p = P(sp.id); if (sp.fan && p && (!p.show_genders?.length || p.show_genders.includes(myG))) ids.add(sp.id) })
+      const fans = [...ids].map(P).filter(p => p && p.status === 'approved' && !blocked(me.id, p.id) && !db.likes.some(l => l.from === me.id && l.to === p.id))
+      return { vip, count: fans.length, people: vip ? fans.map(p => card(me.id, p)) : [] }
     },
     async markRead(convId) {
       const me = approvedMe(); myConv(convId, me.id); let ch = false

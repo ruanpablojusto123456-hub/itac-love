@@ -224,6 +224,26 @@ export function createSupabaseBackend(url, anonKey) {
       const me = await uidOrThrow()
       check(await sb.from('messages').insert({ conversation_id: convId, sender_id: me, body: String(body).trim().slice(0, 2000) }))
     },
+    async sendMedia(convId, blob, { type, viewOnce = false, duration = null } = {}) {
+      const me = await uidOrThrow()
+      const file = type === 'image' ? await toJpeg(blob, 1280, 0.8) : blob
+      const ext = type === 'image' ? 'jpg' : ((blob.type || '').includes('mp4') ? 'm4a' : 'webm')
+      const path = `${convId}/${crypto.randomUUID()}.${ext}`
+      check(await sb.storage.from('chat').upload(path, file, { contentType: type === 'image' ? 'image/jpeg' : (blob.type || 'audio/webm') }))
+      check(await sb.from('messages').insert({ conversation_id: convId, sender_id: me, body: '', media_type: type, media_path: path, view_once: type === 'image' && !!viewOnce, duration_sec: duration }))
+    },
+    mediaUrl: (path) => signed('chat', path),
+    async openViewOnce(msgId) {
+      const path = check(await sb.rpc('open_view_once', { p_msg: msgId }))
+      const { data, error } = await sb.storage.from('chat').createSignedUrl(path, 90)
+      if (error) throw new Error('JA_VISUALIZADA')
+      return data.signedUrl
+    },
+    async finishViewOnce(msgId) {
+      const m = (await sb.from('messages').select('media_path, view_once, viewed_at').eq('id', msgId).maybeSingle()).data
+      if (m?.view_once && m.viewed_at && m.media_path) await sb.storage.from('chat').remove([m.media_path])
+    },
+    async whoLikedMe() { return check(await sb.rpc('who_liked_me')) },
     async setSelfDestruct(convId, secs) { check(await sb.rpc('set_self_destruct', { p_conv: convId, p_seconds: secs || null })) },
     async reportScreenshot(convId) { await sb.rpc('report_screenshot', { p_conv: convId }) },
     async markRead(convId) { await sb.rpc('mark_read', { p_conv: convId }) },

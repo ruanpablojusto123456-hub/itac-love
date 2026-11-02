@@ -7,7 +7,7 @@ import { DEFAULT_TAGS, ageFrom } from './constants'
 import { blobToDataURL, demoAvatar, demoSelfie, toJpeg } from './image'
 import { SEED_PROFILES } from './demoSeeds'
 
-const KEY = 'itaclove_demo_v2'
+const KEY = 'itaclove_demo_v3'
 const listeners = new Set()
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36))
 const now = () => new Date().toISOString()
@@ -44,7 +44,7 @@ function emptyProfile(id, email, name) {
   return {
     id, email, name: name || null, birth_date: null, gender_identity: null, gender_other: null, orientation: null, city: null,
     lat: null, lng: null, bio: '', looking_for: null, show_genders: [], status: 'onboarding', rejection_reason: null,
-    verified: false, verified_at: null, trust_score: 50, invisible: false, paused: false,
+    verified: false, verified_at: null, trust_score: 50, invisible: false, paused: false, prompts: [],
     terms_accepted_at: null, privacy_accepted_at: null, extra_likes: 0, extra_invites: 0, created_at: now(),
   }
 }
@@ -72,7 +72,7 @@ function seed() {
     const id = p.id, email = `${id}@exemplo.itaclove.com`
     db.users.push({ id, email, password: 'exemplo123', seed: true })
     const birth = new Date(Date.now() - (p.age * 365.25 + 40) * 864e5).toISOString().slice(0, 10)
-    db.profiles[id] = { ...emptyProfile(id, email, p.name), birth_date: birth, gender_identity: p.g, orientation: p.o || 'Heterossexual', city: p.city || 'Itacarambi, MG', bio: p.bio, looking_for: p.look, show_genders: p.show, status: 'approved', verified: true, verified_at: now(), trust_score: p.trust ?? 70, terms_accepted_at: now(), privacy_accepted_at: now(), km: p.km }
+    db.profiles[id] = { ...emptyProfile(id, email, p.name), birth_date: birth, gender_identity: p.g, orientation: p.o || 'Heterossexual', city: p.city || 'Itacarambi, MG', bio: p.bio, looking_for: p.look, show_genders: p.show, status: 'approved', verified: true, verified_at: now(), trust_score: p.trust ?? 70, terms_accepted_at: now(), privacy_accepted_at: now(), km: p.km, prompts: p.prompts || [] }
     db.photos[id] = [0, 1, 2].map(v => { const path = `photos/${id}/${v + 1}.jpg`; db.files[path] = demoAvatar(p.name, p.hue, v, 300); return { position: v + 1, path } })
     db.interests[id] = p.tags
   })

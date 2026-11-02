@@ -75,6 +75,9 @@ export const ERRORS = {
   CONTA_PAUSADA: 'Sua conta está pausada. Reative em Perfil para curtir.',
   CONVERSA_ENCERRADA: 'Esta conversa foi encerrada.',
   CONTA_NAO_LIBERADA: 'Sua conta ainda não foi liberada.',
+  SO_DESTINATARIO: 'Só quem recebeu pode abrir esta foto.',
+  JA_VISUALIZADA: 'Esta foto já foi vista e não pode ser aberta de novo.',
+  CAMINHO_INVALIDO: 'Não foi possível enviar o arquivo.',
   'Invalid login credentials': 'E-mail ou senha incorretos.',
   'User already registered': 'Este e-mail já tem cadastro. Use "Entrar".',
 }
@@ -118,3 +121,17 @@ export function isScam(text, words = []) {
   const nt = norm(t)
   return words.some(w => w && new RegExp(`(^|[^a-z0-9])${norm(w.toLowerCase()).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z0-9]|$)`, 'i').test(nt))
 }
+
+// Perguntas do perfil (até 3 respostas) — ajudam a puxar assunto
+export const PROMPT_QUESTIONS = [
+  'Meu rolê ideal em Itacarambi é…',
+  'Um domingo perfeito pra mim é…',
+  'A música que não sai da minha playlist é…',
+  'Vamos nos dar bem se você…',
+  'Meu lugar preferido na beira do Velho Chico é…',
+  'Uma coisa que pouca gente sabe sobre mim…',
+  'Meu prato preferido é…',
+  'O que me faz rir na hora é…',
+  'No primeiro encontro eu gostaria de…',
+  'Eu não abro mão de…',
+]
