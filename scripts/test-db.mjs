@@ -8,6 +8,7 @@ const ok = (c, m) => { if (!c) { console.error('❌', m); process.exitCode = 1 }
 
 await db.exec(`
 create role anon; create role authenticated; create role service_role;
+create schema extensions; create extension pgcrypto with schema extensions;
 create schema auth; create schema storage;
 create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}');
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
@@ -16,11 +17,11 @@ create table storage.buckets (id text primary key, name text, public boolean);
 create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text);
 alter table storage.objects enable row level security;
 create function storage.foldername(name text) returns text[] language sql immutable as $$ select string_to_array(name,'/') $$;
-grant usage on schema public, auth, storage to anon, authenticated, service_role;
+grant usage on schema public, auth, storage, extensions to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 `)
-for (const f of ['0001_schema.sql', '0002_functions.sql', '0003_policies.sql']) {
+for (const f of ['0001_schema.sql', '0002_functions.sql', '0003_policies.sql', '0005_media_prompts_vip.sql']) {
   await db.exec(fs.readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), 'utf8'))
   console.log('✅ migração', f)
 }
@@ -135,6 +136,28 @@ await q(`update messages set expires_at = now() - interval '1 minute' where body
 ok((await q(`select job_purge_messages() n`))[0].n === 1, 'mensagens vencidas apagadas do servidor')
 const lst = await as(ana, () => q(`select * from my_conversations()`))
 ok(lst.length === 1 && lst[0].other_name === 'Bruno', 'lista de conversas')
+
+// v1.1: mídia, visualização única, perguntas, quem curtiu você
+await as(ana, () => q(`insert into messages(conversation_id, sender_id, body, media_type, media_path, view_once) values ($1,$2,'', 'image', $3, true)`, [conv, ana, `${conv}/foto.jpg`]))
+const vo = (await q(`select id from messages where media_type='image'`))[0].id
+await expectErr(as(ana, () => q(`select open_view_once($1)`, [vo])), 'SO_DESTINATARIO', 'quem enviou não reabre a foto de visualização única')
+ok((await as(bruno, () => q(`select open_view_once($1) p`, [vo])))[0].p === `${conv}/foto.jpg`, 'destinatário abre a foto uma vez')
+await expectErr(as(bruno, () => q(`select open_view_once($1)`, [vo])), 'JA_VISUALIZADA', 'segunda abertura é bloqueada')
+await expectErr(as(ana, () => q(`insert into messages(conversation_id, sender_id, body, media_type, media_path) values ($1,$2,'', 'image', 'outra/foto.jpg')`, [conv, ana])), 'CAMINHO_INVALIDO', 'mídia só na pasta da conversa')
+await as(bruno, () => q(`insert into messages(conversation_id, sender_id, body, media_type, media_path, duration_sec) values ($1,$2,'', 'audio', $3, 12)`, [conv, bruno, `${conv}/a.webm`]))
+ok((await as(ana, () => q(`select last_body from my_conversations()`)))[0].last_body === '🎤 Áudio', 'lista de conversas mostra "Áudio"')
+await as(ana, () => q(`update profiles set prompts = '[{"q":"Meu rolê ideal","a":"Forró na praça"}]' where id=$1`, [ana]))
+ok((await as(bruno, () => q(`select prompts from public_profiles where id=$1`, [ana])))[0].prompts.length === 1, 'perguntas do perfil visíveis para outros')
+const carla2 = await newUser('carla2@x.com', 'Carla2')
+await onboard(carla2, 'mulher_cis', ['homens'], tags.slice(0, 3))
+await q(`update profiles set status='approved', verified=true where id=$1`, [carla2])
+await q(`update profiles set extra_likes = 5 where id=$1`, [bruno])
+await as(bruno, () => q(`select like_profile($1,'like')`, [carla2]))
+const w1 = (await as(carla2, () => q(`select who_liked_me() w`)))[0].w
+ok(w1.count === 1 && w1.people.length === 0 && !w1.vip, 'sem VIP: vê só quantas pessoas curtiram')
+await q(`update profiles set vip_until = now() + interval '30 days' where id=$1`, [carla2])
+const w2 = (await as(carla2, () => q(`select who_liked_me() w`)))[0].w
+ok(w2.vip && w2.people.length === 1 && w2.people[0].name === 'Bruno', 'com VIP: vê quem curtiu')
 
 // expiração de match
 await as(carla, () => q(`select like_profile($1,'like')`, [ana]))
