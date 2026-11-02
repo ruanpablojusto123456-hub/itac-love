@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SessionProvider, homeFor, useSession } from './lib/session'
 import { api } from './lib/api'
@@ -46,13 +46,16 @@ function AppRoutes() {
   const s = useSession()
   const [update, setUpdate] = useState(null)
 
-  // Registra acesso por plataforma e verifica atualização do APK
+  // Registra acesso por plataforma e verifica atualização do APK (uma vez por usuário/abertura)
+  const accessed = useRef(null)
+  const uid = s.user?.id
   useEffect(() => {
-    if (!s.user) return
+    if (!uid || accessed.current === uid) return
+    accessed.current = uid
     api.recordAccess(platformName()).then(info => {
       if (isNative() && info?.latest_app_version && isNewer(info.latest_app_version)) setUpdate(info)
     }).catch(() => {})
-  }, [s.user])
+  }, [uid])
 
   return (
     <>
