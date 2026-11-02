@@ -606,7 +606,9 @@ declare s public.app_settings := public.settings();
 begin
   if auth.uid() is not null and p_platform in ('web','android') then
     insert into public.platform_access(user_id, day, platform) values (auth.uid(), public.br_today(), p_platform) on conflict do nothing;
-    update public.profiles set last_platform = p_platform, last_seen_at = now() where id = auth.uid();
+    -- só grava se mudou de plataforma ou passou 1 hora (evita disparar o tempo real à toa)
+    update public.profiles set last_platform = p_platform, last_seen_at = now()
+    where id = auth.uid() and (last_platform is distinct from p_platform or last_seen_at is null or last_seen_at < now() - interval '1 hour');
   end if;
   return jsonb_build_object('latest_app_version', s.latest_app_version, 'apk_download_url', s.apk_download_url, 'terms_version', s.terms_version);
 end $$;
