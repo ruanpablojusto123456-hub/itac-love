@@ -34,6 +34,10 @@ jobs:
       - run: npm ci
       - name: Versão do app (package.json)
         run: echo "VITE_APP_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+      - name: Push do Firebase configurado?
+        env:
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: if [ -n "$GSJ" ]; then echo "VITE_FCM_ENABLED=1" >> $GITHUB_ENV; fi
       - run: npm run build
       - name: Gerar projeto Android (Capacitor) e personalizar
         run: |
@@ -41,6 +45,11 @@ jobs:
           npx cap add android
           python3 scripts/patch_android.py
       - run: npx cap sync android
+      - name: Copiar google-services.json (push do Firebase)
+        if: env.VITE_FCM_ENABLED == '1'
+        env:
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: printf '%s' "$GSJ" > android/app/google-services.json
       - name: Gerar APK
         working-directory: android
         run: |
