@@ -91,7 +91,7 @@ export function createDemoSocial(I) {
         const exp = c.self_destruct_seconds ? new Date(Date.now() + c.self_destruct_seconds * 1000).toISOString() : null
         db.messages.push({ id: uid(), conversation_id: convId, sender_id: seedId, kind: 'text', body: s.replies[n], created_at: now(), read_at: null, expires_at: exp })
         const meId = other(c, seedId)
-        notify(meId, 'message', s.name, s.replies[n])
+        notify(meId, 'message', s.name, s.replies[n], { conversation_id: convId })
         save()
       } catch { /* ignore */ }
     }, 1800 + Math.random() * 1500)
@@ -191,7 +191,7 @@ export function createDemoSocial(I) {
         i.status = 'accepted'; i.responded_at = now()
         const [a, b] = pair(i.from_id, i.to_id)
         const c = { id: uid(), match_id: null, invite_id: i.id, user_a: a, user_b: b, self_destruct_seconds: null, closed_at: null, created_at: now() }
-        d.conversations.push(c); notify(i.from_id, 'invite_accepted', 'Convite aceito! 🎉', `${t.name} aceitou seu convite. O chat está aberto.`)
+        d.conversations.push(c); notify(i.from_id, 'invite_accepted', 'Convite aceito! 🎉', `${t.name} aceitou seu convite. O chat está aberto.`, { conversation_id: c.id })
         save(); scheduleReply(c.id, target)
       }, 4000)
       return { id: inv.id, quota: quotaStatus(me) }
@@ -224,12 +224,12 @@ export function createDemoSocial(I) {
       return db.conversations.filter(c => [c.user_a, c.user_b].includes(me.id) && !c.closed_at).map(c => {
         const o = P(other(c, me.id)); const m = db.matches.find(x => x.id === c.match_id)
         if (m && m.status !== 'active') return null
-        const msgs = db.messages.filter(x => x.conversation_id === c.id)
+        const msgs = db.messages.filter(x => x.conversation_id === c.id && !(x.hidden_for || []).includes(me.id))
         const last = msgs[msgs.length - 1]
         return {
           conversation_id: c.id, match_id: c.match_id, other_id: o.id, other_name: o.name, other_photo: photosOf(o.id)[0], other_verified: o.verified,
           expires_at: m?.expires_at || null, first_message_at: m?.first_message_at || null, self_destruct_seconds: c.self_destruct_seconds,
-          last_body: last ? (last.media_type === 'image' ? '📷 Foto' : last.media_type === 'audio' ? '🎤 Áudio' : last.body) : null, last_at: last?.created_at || null, created_at: c.created_at,
+          last_body: last ? (last.deleted_for_all ? '🚫 Mensagem apagada' : last.media_type === 'image' ? '📷 Foto' : last.media_type === 'audio' ? '🎤 Áudio' : last.body) : null, last_at: last?.created_at || null, created_at: c.created_at,
           unread: msgs.filter(x => x.sender_id === o.id && !x.read_at).length,
         }
       }).filter(Boolean).sort((a, b) => (b.last_at || b.created_at).localeCompare(a.last_at || a.created_at))
@@ -242,15 +242,27 @@ export function createDemoSocial(I) {
     async listMessages(convId) {
       jobs()
       const me = approvedMe(); myConv(convId, me.id)
-      return load().messages.filter(m => m.conversation_id === convId).sort((a, b) => a.created_at.localeCompare(b.created_at))
+      return load().messages.filter(m => m.conversation_id === convId && !(m.hidden_for || []).includes(me.id)).sort((a, b) => a.created_at.localeCompare(b.created_at))
     },
-    async sendMessage(convId, body) {
+    async deleteMessage(msgId, forAll) {
+      const me = approvedMe(); const db = load(); const m = db.messages.find(x => x.id === msgId)
+      if (!m) return; myConv(m.conversation_id, me.id)
+      if (forAll) {
+        if (m.sender_id !== me.id) throw new Error('SO_QUEM_ENVIOU')
+        if (m.media_path) delete db.files[m.media_path]
+        Object.assign(m, { deleted_for_all: true, body: '', media_type: null, media_path: null, view_once: false })
+      } else m.hidden_for = [...(m.hidden_for || []), me.id]
+      save()
+    },
+    async sendMessage(convId, body, { replyTo = null } = {}) {
       const me = approvedMe(); const c = myConv(convId, me.id); const db = load()
       if (c.closed_at) throw new Error('CONVERSA_ENCERRADA')
       const text = String(body || '').trim().slice(0, 2000); if (!text) return
-      db.messages.push({ id: uid(), conversation_id: convId, sender_id: me.id, kind: 'text', body: text, created_at: now(), read_at: null, expires_at: c.self_destruct_seconds ? new Date(Date.now() + c.self_destruct_seconds * 1000).toISOString() : null })
+      const row = { id: uid(), conversation_id: convId, sender_id: me.id, kind: 'text', body: text, reply_to: replyTo, created_at: now(), read_at: null, expires_at: c.self_destruct_seconds ? new Date(Date.now() + c.self_destruct_seconds * 1000).toISOString() : null }
+      db.messages.push(row)
       const m = db.matches.find(x => x.id === c.match_id); if (m && !m.first_message_at) m.first_message_at = now()
       save(); scheduleReply(convId, other(c, me.id))
+      return { ...row }
     },
     async setSelfDestruct(convId, secs) {
       const me = approvedMe(); const c = myConv(convId, me.id)
@@ -264,14 +276,14 @@ export function createDemoSocial(I) {
       sysMsg(convId, `${me.name} tentou tirar um print desta conversa.`); save()
     },
     // ---------------------------------------------------- MÍDIA NO CHAT
-    async sendMedia(convId, blob, { type, viewOnce = false, duration = null } = {}) {
+    async sendMedia(convId, blob, { type, viewOnce = false, duration = null, replyTo = null } = {}) {
       const me = approvedMe(); const c = myConv(convId, me.id); const db = load()
       if (c.closed_at) throw new Error('CONVERSA_ENCERRADA')
       const data = type === 'image' ? await blobToDataURL(await toJpeg(blob, 900, 0.72)) : await blobToDataURL(blob)
       const path = `chat/${convId}/${uid()}.${type === 'image' ? 'jpg' : 'webm'}`
       db.files[path] = data
       db.messages.push({ id: uid(), conversation_id: convId, sender_id: me.id, kind: 'text', body: '', media_type: type, media_path: path,
-        view_once: type === 'image' && !!viewOnce, viewed_at: null, duration_sec: duration, created_at: now(), read_at: null,
+        view_once: type === 'image' && !!viewOnce, viewed_at: null, duration_sec: duration, reply_to: replyTo, created_at: now(), read_at: null,
         expires_at: c.self_destruct_seconds ? new Date(Date.now() + c.self_destruct_seconds * 1000).toISOString() : null })
       const m = db.matches.find(x => x.id === c.match_id); if (m && !m.first_message_at) m.first_message_at = now()
       save(); scheduleReply(convId, other(c, me.id))

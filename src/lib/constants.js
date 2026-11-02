@@ -78,6 +78,8 @@ export const ERRORS = {
   SO_DESTINATARIO: 'Só quem recebeu pode abrir esta foto.',
   JA_VISUALIZADA: 'Esta foto já foi vista e não pode ser aberta de novo.',
   CAMINHO_INVALIDO: 'Não foi possível enviar o arquivo.',
+  SO_QUEM_ENVIOU: 'Só quem enviou pode apagar para todos.',
+  NAO_PERMITIDO: 'Esta mensagem não pode ser apagada.',
   'Invalid login credentials': 'E-mail ou senha incorretos.',
   'User already registered': 'Este e-mail já tem cadastro. Use "Entrar".',
 }

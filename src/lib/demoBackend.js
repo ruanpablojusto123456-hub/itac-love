@@ -6,6 +6,7 @@
 import { DEFAULT_TAGS, ageFrom } from './constants'
 import { blobToDataURL, demoAvatar, demoSelfie, toJpeg } from './image'
 import { SEED_PROFILES } from './demoSeeds'
+import { handleIncomingNotification } from './notify'
 
 const KEY = 'itaclove_demo_v3'
 const listeners = new Set()
@@ -86,7 +87,10 @@ function seed() {
 const me = () => { const db = load(); return db.session ? db.users.find(u => u.id === db.session) : null }
 const requireMe = () => { const u = me(); if (!u) throw new Error('NAO_AUTENTICADO'); return u }
 const requireAdmin = () => { const u = requireMe(); if (!u.isAdmin) throw new Error('SOMENTE_ADMIN'); return u }
-const notify = (user_id, type, title, body) => load().notifications.unshift({ id: uid(), user_id, type, title, body, created_at: now(), read_at: null })
+const notify = (user_id, type, title, body, data = {}) => {
+  const db = load(); db.notifications.unshift({ id: uid(), user_id, type, title, body, data, created_at: now(), read_at: null })
+  if (db.session === user_id) setTimeout(() => handleIncomingNotification({ title, body, data }), 0)
+}
 const docHash = (v) => String(v || '').replace(/[^0-9a-z]/gi, '').toUpperCase()
 
 export const _internals = { load, save, me, requireMe, requireAdmin, notify, uid, now, emit: () => listeners.forEach(fn => fn()) }

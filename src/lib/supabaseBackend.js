@@ -6,6 +6,7 @@ import { App } from '@capacitor/app'
 import { Browser } from '@capacitor/browser'
 import { isNative } from './platform'
 import { toJpeg } from './image'
+import { handleIncomingNotification } from './notify'
 
 const NATIVE_REDIRECT = 'br.com.itaclove.app://login-callback'
 
@@ -35,7 +36,7 @@ export function createSupabaseBackend(url, anonKey) {
     if (!userId) return
     channel = sb.channel('me-' + userId)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` }, emit)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, emit)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (p) => { handleIncomingNotification(p.new); emit() })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, emit)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, emit)
       .subscribe()
@@ -219,18 +220,32 @@ export function createSupabaseBackend(url, anonKey) {
       const other = await this.getPublicProfile(c.user_a === me ? c.user_b : c.user_a)
       return { ...c, other }
     },
-    async listMessages(convId) { return check(await sb.from('messages').select('*').eq('conversation_id', convId).order('created_at')) },
-    async sendMessage(convId, body) {
+    async listMessages(convId) {
       const me = await uidOrThrow()
-      check(await sb.from('messages').insert({ conversation_id: convId, sender_id: me, body: String(body).trim().slice(0, 2000) }))
+      return check(await sb.from('messages').select('*').eq('conversation_id', convId).order('created_at')).filter(m => !(m.hidden_for || []).includes(me))
     },
-    async sendMedia(convId, blob, { type, viewOnce = false, duration = null } = {}) {
+    // Tempo real de UMA conversa: entrega cada mensagem nova/alterada sem recarregar a lista inteira
+    subscribeConversation(convId, onChange) {
+      const ch = sb.channel('conv-' + convId + '-' + Math.random().toString(36).slice(2))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${convId}` }, (p) => onChange(p.eventType, p.new, p.old))
+        .subscribe()
+      return () => sb.removeChannel(ch)
+    },
+    async deleteMessage(msgId, forAll) {
+      const path = check(await sb.rpc('delete_message', { p_msg: msgId, p_for_all: !!forAll }))
+      if (path) await sb.storage.from('chat').remove([path])
+    },
+    async sendMessage(convId, body, { replyTo = null } = {}) {
+      const me = await uidOrThrow()
+      return check(await sb.from('messages').insert({ conversation_id: convId, sender_id: me, body: String(body).trim().slice(0, 2000), reply_to: replyTo }).select().single())
+    },
+    async sendMedia(convId, blob, { type, viewOnce = false, duration = null, replyTo = null } = {}) {
       const me = await uidOrThrow()
       const file = type === 'image' ? await toJpeg(blob, 1280, 0.8) : blob
       const ext = type === 'image' ? 'jpg' : ((blob.type || '').includes('mp4') ? 'm4a' : 'webm')
       const path = `${convId}/${crypto.randomUUID()}.${ext}`
       check(await sb.storage.from('chat').upload(path, file, { contentType: type === 'image' ? 'image/jpeg' : (blob.type || 'audio/webm') }))
-      check(await sb.from('messages').insert({ conversation_id: convId, sender_id: me, body: '', media_type: type, media_path: path, view_once: type === 'image' && !!viewOnce, duration_sec: duration }))
+      check(await sb.from('messages').insert({ conversation_id: convId, sender_id: me, body: '', media_type: type, media_path: path, view_once: type === 'image' && !!viewOnce, duration_sec: duration, reply_to: replyTo }))
     },
     mediaUrl: (path) => signed('chat', path),
     async openViewOnce(msgId) {
