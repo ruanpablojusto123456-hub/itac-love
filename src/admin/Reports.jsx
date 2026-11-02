@@ -62,7 +62,7 @@ export default function Reports() {
   return (
     <div className="max-w-4xl">
       <h1 className="text-[28px] font-bold">Denúncias</h1>
-      <div className="flex gap-2 mt-3">{[['open', 'Abertas'], ['confirmed', 'Confirmadas'], ['dismissed', 'Descartadas'], ['all', 'Todas']].map(([id, l]) => <button key={id} onClick={() => setStatus(id)} className={`rounded-full px-4 py-2 text-[14px] font-semibold ${status === id ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>)}</div>
+      <div className="flex gap-2 mt-3">{[['open', 'Abertas'], ['confirmed', 'Confirmadas'], ['dismissed', 'Descartadas'], ['all', 'Todas']].map(([id, l]) => <button key={id} onClick={() => setStatus(id)} className={`rounded-full px-4 py-2 text-[14px] font-semibold ${status === id ? 'bg-night text-white' : 'bg-card'}`}>{l}</button>)}</div>
       {!data ? <Spinner /> : !data.length ? <Card className="mt-5 p-10 text-center text-ink-soft"><Inbox className="w-10 h-10 mx-auto mb-2 text-tertiary" />Nenhuma denúncia aqui.</Card>
         : <div className="mt-5 space-y-4">{data.map(r => <ReportCard key={r.id} r={r} />)}</div>}
     </div>

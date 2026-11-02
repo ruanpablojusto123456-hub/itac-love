@@ -41,7 +41,7 @@ function Detail({ v, onDone }) {
           <p className="text-ink-soft text-[14px]">{p.email} · {p.city}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber/20 text-[#7a4d00] px-3 py-1 text-[12px] font-bold"><Clock className="w-4 h-4" />Aguardando há {ago(v.created_at)}</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber/20 text-amber-ink px-3 py-1 text-[12px] font-bold"><Clock className="w-4 h-4" />Aguardando há {ago(v.created_at)}</span>
           {v.previous > 0 && <span className="rounded-full bg-violet/15 text-violet px-3 py-1 text-[12px] font-bold">{v.previous} envio(s) anterior(es)</span>}
           {age < 18 && <span className="inline-flex items-center gap-1 rounded-full bg-secondary text-white px-3 py-1 text-[12px] font-bold"><ShieldAlert className="w-4 h-4" />MENOR DE IDADE</span>}
         </div>
@@ -51,7 +51,7 @@ function Detail({ v, onDone }) {
       <div className="grid lg:grid-cols-[1.3fr_1fr] gap-4 mt-5">
         <div>
           <div className="text-[12px] font-bold uppercase text-ink-soft mb-1.5">Selfie com documento</div>
-          <div className="relative rounded-2xl overflow-hidden bg-ink no-select" onContextMenu={e => e.preventDefault()}>
+          <div className="relative rounded-2xl overflow-hidden bg-night no-select" onContextMenu={e => e.preventDefault()}>
             {v.selfie_path ? <PhotoImg selfie path={v.selfie_path} className="w-full max-h-[420px] object-contain" alt="Selfie com documento" /> : <div className="p-10 text-white/70 text-center">Imagem já excluída</div>}
             <Watermark />
           </div>
@@ -74,14 +74,14 @@ function Detail({ v, onDone }) {
 
       <div className="mt-5 rounded-2xl bg-surface-low p-4">
         <label className="label" htmlFor="doc">Número do RG/CNH visto na foto <span className="font-normal text-ink-soft text-[13px]">(opcional — guardamos só um código irreversível para bloquear contas duplicadas e banidas)</span></label>
-        <input id="doc" className="field bg-white" value={doc} onChange={e => setDoc(e.target.value)} placeholder="Ex.: MG-12.345.678" />
+        <input id="doc" className="field bg-card" value={doc} onChange={e => setDoc(e.target.value)} placeholder="Ex.: MG-12.345.678" />
       </div>
 
       {mode && (
         <div className="mt-4 rounded-2xl border-2 border-dashed border-ink-line p-4">
           <div className="font-semibold mb-2">{mode === 'reject' ? 'Motivo da reprovação (obrigatório)' : 'O que precisa melhorar na nova foto?'}</div>
-          <div className="flex flex-wrap gap-2 mb-3">{REJECT_PRESETS.map(r => <button key={r} onClick={() => setReason(r)} className={`rounded-full border px-3 py-1 text-[13px] ${reason === r ? 'bg-ink text-white border-ink' : 'bg-white border-ink-line'}`}>{r}</button>)}</div>
-          <textarea className="field bg-white" rows={2} value={reason} onChange={e => setReason(e.target.value)} placeholder="Escreva o motivo que o usuário vai ver" />
+          <div className="flex flex-wrap gap-2 mb-3">{REJECT_PRESETS.map(r => <button key={r} onClick={() => setReason(r)} className={`rounded-full border px-3 py-1 text-[13px] ${reason === r ? 'bg-night text-white border-ink' : 'bg-card border-ink-line'}`}>{r}</button>)}</div>
+          <textarea className="field bg-card" rows={2} value={reason} onChange={e => setReason(e.target.value)} placeholder="Escreva o motivo que o usuário vai ver" />
         </div>
       )}
       <div className="mt-3"><ErrorBox>{error}</ErrorBox></div>
@@ -113,14 +113,14 @@ export default function VerificationQueue() {
   return (
     <div className="max-w-6xl">
       <h1 className="text-[28px] font-bold">Verificações pendentes <span className="text-ink-soft font-normal text-[20px]">({list.length})</span></h1>
-      {flash && <div className="mt-3 rounded-xl bg-amber/20 text-[#7a4d00] font-semibold px-4 py-3 text-[14px]">{flash}</div>}
+      {flash && <div className="mt-3 rounded-xl bg-amber/20 text-amber-ink font-semibold px-4 py-3 text-[14px]">{flash}</div>}
       {!list.length ? (
         <Card className="mt-6 p-10 text-center text-ink-soft"><Inbox className="w-10 h-10 mx-auto mb-2 text-tertiary" />Nenhuma verificação pendente. Tudo em dia!</Card>
       ) : (
         <div className="grid lg:grid-cols-[260px_1fr] gap-4 mt-5">
           <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-1">
             {list.map(v => (
-              <button key={v.id} onClick={() => { setSel(v); setFlash('') }} className={`flex items-center gap-3 rounded-2xl p-2.5 text-left min-w-[220px] transition ${sel?.id === v.id ? 'bg-white shadow-md ring-2 ring-primary' : 'bg-white/60 hover:bg-white'}`}>
+              <button key={v.id} onClick={() => { setSel(v); setFlash('') }} className={`flex items-center gap-3 rounded-2xl p-2.5 text-left min-w-[220px] transition ${sel?.id === v.id ? 'bg-card shadow-md ring-2 ring-primary' : 'bg-card/60 hover:bg-card'}`}>
                 <PhotoImg path={v.photos[0]} className="w-12 h-12 rounded-xl object-cover" alt="" />
                 <div className="min-w-0"><div className="font-semibold truncate">{v.profile.name}, {ageFrom(v.profile.birth_date)}</div><div className="text-[12px] text-ink-soft">há {ago(v.created_at)}{v.previous ? ' · reenvio' : ''}</div></div>
               </button>))}

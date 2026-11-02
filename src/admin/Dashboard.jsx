@@ -24,7 +24,7 @@ export default function Dashboard() {
     ['Vendas via Pix', `${d.vendas_pix_qtd} · ${brl(d.vendas_pix_total_cents)}`, Wallet, 'text-tertiary', '/admin/vendas'],
   ]
   const web = d.acessos_web_30d, apk = d.acessos_android_30d, tot = web + apk || 1
-  const status = { approved: ['Aprovado', 'bg-tertiary-fixed/50 text-tertiary'], rejected: ['Reprovado', 'bg-secondary-fixed text-secondary'], resubmit: ['Nova foto', 'bg-amber/20 text-[#7a4d00]'] }
+  const status = { approved: ['Aprovado', 'bg-tertiary-fixed/50 text-tertiary'], rejected: ['Reprovado', 'bg-secondary-fixed text-secondary'], resubmit: ['Nova foto', 'bg-amber/20 text-amber-ink'] }
   return (
     <div className="max-w-5xl">
       <h1 className="text-[28px] font-bold">Painel</h1>

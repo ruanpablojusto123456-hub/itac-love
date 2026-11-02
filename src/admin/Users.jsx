@@ -6,7 +6,7 @@ import { TrustBar } from './Reports'
 import { api } from '../lib/api'
 import { useLive } from '../lib/hooks'
 
-const ST = { approved: ['Aprovado', 'bg-tertiary-fixed/50 text-tertiary'], pending_review: ['Em análise', 'bg-amber/20 text-[#7a4d00]'], onboarding: ['Cadastrando', 'bg-surface-mid text-ink-soft'], needs_new_photo: ['Nova foto', 'bg-amber/20 text-[#7a4d00]'], rejected: ['Reprovado', 'bg-secondary-fixed text-secondary'], under_review: ['Em revisão', 'bg-amber/20 text-[#7a4d00]'], suspended: ['Suspenso', 'bg-secondary-fixed text-secondary'], banned: ['Banido', 'bg-secondary text-white'] }
+const ST = { approved: ['Aprovado', 'bg-tertiary-fixed/50 text-tertiary'], pending_review: ['Em análise', 'bg-amber/20 text-amber-ink'], onboarding: ['Cadastrando', 'bg-surface-mid text-ink-soft'], needs_new_photo: ['Nova foto', 'bg-amber/20 text-amber-ink'], rejected: ['Reprovado', 'bg-secondary-fixed text-secondary'], under_review: ['Em revisão', 'bg-amber/20 text-amber-ink'], suspended: ['Suspenso', 'bg-secondary-fixed text-secondary'], banned: ['Banido', 'bg-secondary text-white'] }
 
 export default function Users() {
   const [q, setQ] = useState('')
@@ -19,7 +19,7 @@ export default function Users() {
   return (
     <div className="max-w-5xl">
       <h1 className="text-[28px] font-bold">Usuários</h1>
-      <div className="relative mt-3 max-w-md"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-mute" /><input id="user-search" className="field pl-12 bg-white" placeholder="Buscar por nome ou e-mail" value={q} onChange={e => setQ(e.target.value)} /></div>
+      <div className="relative mt-3 max-w-md"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-mute" /><input id="user-search" className="field pl-12 bg-card" placeholder="Buscar por nome ou e-mail" value={q} onChange={e => setQ(e.target.value)} /></div>
       {!data ? <Spinner /> : (
         <Card className="mt-4 overflow-x-auto">
           <table className="w-full text-[14px] min-w-[720px]">

@@ -24,7 +24,7 @@ function AdminLogin() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-ink to-primary">
       <Card className="w-full max-w-sm p-6">
-        <div className="flex flex-col items-center"><Logo className="w-40" /><span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink text-white text-[12px] font-bold px-3 py-1"><ShieldCheck className="w-4 h-4" />PAINEL DO ADMINISTRADOR</span></div>
+        <div className="flex flex-col items-center"><Logo className="w-40" /><span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-night text-white text-[12px] font-bold px-3 py-1"><ShieldCheck className="w-4 h-4" />PAINEL DO ADMINISTRADOR</span></div>
         <form onSubmit={submit} className="mt-6 space-y-3">
           <div className="relative"><Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-mute" /><input className="field pl-12" type="email" required placeholder="E-mail do administrador" value={email} onChange={e => setEmail(e.target.value)} /></div>
           <div className="relative"><KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-mute" /><input className="field pl-12" type="password" required placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} /></div>
@@ -53,9 +53,9 @@ export default function AdminApp() {
 
   return (
     <div className="min-h-screen bg-surface lg:flex">
-      <aside className="lg:w-60 lg:min-h-screen bg-ink text-white lg:flex lg:flex-col shrink-0">
+      <aside className="lg:w-60 lg:min-h-screen bg-night text-white lg:flex lg:flex-col shrink-0">
         <div className="flex items-center justify-between lg:block px-4 py-3 lg:py-5">
-          <div className="flex items-center gap-2"><div className="bg-white rounded-xl p-1"><Logo className="w-14" /></div><div className="text-[12px] font-bold leading-tight opacity-80">PAINEL<br />ADMIN</div></div>
+          <div className="flex items-center gap-2"><div className="bg-card rounded-xl p-1"><Logo className="w-14" /></div><div className="text-[12px] font-bold leading-tight opacity-80">PAINEL<br />ADMIN</div></div>
           <button onClick={() => api.signOut()} className="lg:hidden inline-flex items-center gap-1 text-[13px] opacity-80"><LogOut className="w-4 h-4" />Sair</button>
         </div>
         <nav className="flex lg:flex-col gap-1 px-2 pb-2 overflow-x-auto">

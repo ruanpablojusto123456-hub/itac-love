@@ -52,7 +52,7 @@ export default function SettingsPage() {
         <div className="mt-5 rounded-xl bg-surface-low p-4">
           <div className="font-semibold text-[14px]">Não binários e demais identidades</div>
           <div className="flex gap-2 mt-2">
-            {[[true, 'Ilimitado'], [false, 'Com limite']].map(([v, l]) => <button key={l} onClick={() => set('quota_other_unlimited', v)} className={`rounded-full px-4 py-2 text-[14px] font-semibold border ${s.quota_other_unlimited === v ? 'bg-primary text-white border-primary' : 'bg-white border-ink-line'}`}>{l}</button>)}
+            {[[true, 'Ilimitado'], [false, 'Com limite']].map(([v, l]) => <button key={l} onClick={() => set('quota_other_unlimited', v)} className={`rounded-full px-4 py-2 text-[14px] font-semibold border ${s.quota_other_unlimited === v ? 'bg-primary text-white border-primary' : 'bg-card border-ink-line'}`}>{l}</button>)}
           </div>
           {!s.quota_other_unlimited && <div className="grid sm:grid-cols-2 gap-4 mt-3"><Num label="Curtidas por dia" k="quota_other_likes" {...p} /><Num label="Convites por dia" k="quota_other_invites" {...p} /></div>}
         </div>
