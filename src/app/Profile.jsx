@@ -42,7 +42,7 @@ export default function Profile() {
 
   return (
     <div className="pb-10">
-      <header className="bg-card/80 backdrop-blur sticky top-0 z-10 border-b border-surface-highest">
+      <header className="bg-card/80 backdrop-blur sticky top-safe z-10 border-b border-surface-highest">
         <div className="max-w-xl mx-auto px-4 py-2 flex items-center justify-between">
           <Logo className="w-24 lg:hidden" /><h1 className="hidden lg:block text-[24px] font-bold">Meu perfil</h1>
           <button onClick={() => api.signOut()} className="inline-flex items-center gap-1.5 text-ink-soft font-semibold text-[14px]"><LogOut className="w-4 h-4" />Sair</button>

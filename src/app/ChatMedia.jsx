@@ -22,7 +22,7 @@ export function MediaViewer({ src, viewer, onClose, viewOnce }) {
     return () => clearInterval(t)
   }, [viewOnce, onClose])
   return (
-    <div className="fixed inset-0 z-[70] bg-black flex flex-col no-select" {...blockCopy}>
+    <div className="fixed inset-0 z-[70] bg-black flex flex-col no-select pt-safe" {...blockCopy}>
       <div className="flex items-center justify-between p-4 text-white">
         <span className="text-[14px] font-semibold flex items-center gap-2">{viewOnce ? <><Eye className="w-4 h-4" />Visualização única · fecha em {left}s</> : 'Foto'}</span>
         <button onClick={onClose} aria-label="Fechar" className="p-2 rounded-full bg-white/10"><X className="w-6 h-6" /></button>
@@ -94,7 +94,7 @@ export function AudioMessage({ m, mine }) {
 }
 
 // Botões de anexar foto e gravar áudio na barra do chat
-export function useChatMedia(convId, setError) {
+export function useChatMedia(convId, setError, getReply, onSent) {
   const fileRef = useRef(null)
   const viewOnceRef = useRef(false)
   const [sheet, setSheet] = useState(false)
@@ -108,7 +108,7 @@ export function useChatMedia(convId, setError) {
 
   async function sendImage(blob, viewOnce) {
     setSending(true)
-    try { await api.sendMedia(convId, blob, { type: 'image', viewOnce }) } catch (e) { setError(friendlyError(e)) } finally { setSending(false) }
+    try { await api.sendMedia(convId, blob, { type: 'image', viewOnce, replyTo: getReply?.() || null }); onSent?.() } catch (e) { setError(friendlyError(e)) } finally { setSending(false) }
   }
   async function pick(viewOnce) {
     setSheet(false)
@@ -133,7 +133,7 @@ export function useChatMedia(convId, setError) {
         if (cancelRef.current || secs < 1) return
         const blob = new Blob(chunks.current, { type: r.mimeType || 'audio/webm' })
         setSending(true)
-        try { await api.sendMedia(convId, blob, { type: 'audio', duration: Math.min(secs, 180) }) } catch (e) { setError(friendlyError(e)) } finally { setSending(false) }
+        try { await api.sendMedia(convId, blob, { type: 'audio', duration: Math.min(secs, 180), replyTo: getReply?.() || null }); onSent?.() } catch (e) { setError(friendlyError(e)) } finally { setSending(false) }
       }
       recorder.current = r; startedAt.current = Date.now(); r.start()
       setRec({ seconds: 0 })

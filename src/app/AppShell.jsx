@@ -4,6 +4,7 @@ import { Button, Logo } from '../components/ui'
 import { api } from '../lib/api'
 import { useLive } from '../lib/hooks'
 import { useSession } from '../lib/session'
+import { InAppToast, NotifyPrompt } from '../components/Toast'
 
 function Badge({ n }) {
   if (!n) return null
@@ -58,6 +59,7 @@ export default function AppShell() {
       </aside>
 
       <div className={`flex-1 min-w-0 ${inChat ? '' : 'pb-20'} lg:pb-0`}>
+        {!inChat && <NotifyPrompt />}
         <Outlet />
       </div>
 
@@ -73,6 +75,7 @@ export default function AppShell() {
         </nav>
       )}
       <CheckinModal />
+      <InAppToast />
     </div>
   )
 }

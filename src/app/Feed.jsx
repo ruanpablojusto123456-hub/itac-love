@@ -174,7 +174,7 @@ export default function Feed() {
       {profile.paused && <div className="mt-3 rounded-xl bg-amber/20 text-amber-ink text-[14px] font-semibold px-4 py-2.5">Sua conta está pausada: você não aparece no feed nem pode curtir. <Link to="/app/perfil" className="underline">Reativar</Link></div>}
       {error && <div className="mt-3"><ErrorBox>{error}{/acabaram/.test(error) && <Link to="/app/loja" className="ml-1 underline">Comprar mais</Link>}</ErrorBox></div>}
 
-      <div className="relative mt-3 h-[clamp(360px,calc(100dvh-300px),620px)] lg:h-[clamp(420px,calc(100dvh-230px),640px)]">
+      <div className="relative mt-3 h-[clamp(340px,calc(100dvh-300px-var(--sat)-var(--sab)),620px)] lg:h-[clamp(420px,calc(100dvh-230px),640px)]">
         {!list ? <Spinner /> : !top ? (
           <div className="absolute inset-0 rounded-[28px] border-2 border-dashed border-ink-line flex flex-col items-center justify-center text-center px-8">
             <Heart className="w-12 h-12 text-secondary" />
