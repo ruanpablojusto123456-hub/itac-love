@@ -71,7 +71,7 @@ export function DemoBanner() {
 export function StepHeader({ step, total = 4, title, subtitle, back }) {
   const nav = useNavigate()
   return (
-    <header className="sticky top-0 z-20 bg-surface/90 backdrop-blur border-b border-surface-highest">
+    <header className="sticky top-safe z-20 bg-surface/90 backdrop-blur border-b border-surface-highest">
       <div className="max-w-xl mx-auto px-4 pt-3 pb-3">
         <div className="flex items-center gap-2">
           {back ? <button onClick={() => nav(back)} aria-label="Voltar" className="p-2 -ml-2 rounded-full hover:bg-surface-low"><ArrowLeft className="w-6 h-6" /></button> : <span className="w-10" />}

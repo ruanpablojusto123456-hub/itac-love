@@ -37,7 +37,7 @@ export default function CameraModal({ open, guide = 'face', onClose, onCapture }
 
   if (!open) return null
   return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col pt-safe">
       <div className="flex items-center justify-between p-4 text-white">
         <button onClick={onClose} aria-label="Fechar câmera" className="p-2 rounded-full bg-white/10"><X className="w-6 h-6" /></button>
         <span className="font-display font-semibold">{guide === 'selfie-doc' ? 'Selfie com documento' : 'Foto de perfil'}</span>
