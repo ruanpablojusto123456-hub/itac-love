@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+// O painel admin só é baixado quando alguém abre /admin (o app abre mais rápido)
+const AdminApp = lazy(() => import('./admin/AdminApp'))
+const Store = lazy(() => import('./app/Store'))
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { SessionProvider, homeFor, useSession } from './lib/session'
 import { api } from './lib/api'
@@ -16,13 +19,12 @@ import Feed from './app/Feed'
 import Invites from './app/Invites'
 import Conversations from './app/Conversations'
 import SafeDate from './app/SafeDate'
-import Store from './app/Store'
 import Profile from './app/Profile'
 import WhoLiked from './app/WhoLiked'
 import Terms from './legal/Terms'
 import Privacy from './legal/Privacy'
-import AdminApp from './admin/AdminApp'
 import UpdateBanner from './components/UpdateBanner'
+import { initNotifications } from './lib/notify'
 
 // Bloqueia rotas conforme o status da conta
 function Gate({ allow, children }) {
@@ -58,6 +60,14 @@ function AppRoutes() {
     }).catch(() => {})
   }, [uid])
 
+  // Notificações (uma vez por usuário logado); o token do push vai para o perfil
+  const notifInit = useRef(null)
+  useEffect(() => {
+    if (!uid || notifInit.current === uid || s.isAdmin) return
+    notifInit.current = uid
+    initNotifications({ onToken: (token) => api.updateProfile({ fcm_token: token }).catch(() => {}) })
+  }, [uid, s.isAdmin])
+
   return (
     <>
       <ScrollTop />
@@ -79,11 +89,11 @@ function AppRoutes() {
           <Route path="convites" element={<Invites />} />
           <Route path="conversas/:id?" element={<Conversations />} />
           <Route path="encontro/:convId" element={<SafeDate />} />
-          <Route path="loja" element={<Store />} />
+          <Route path="loja" element={<Suspense fallback={<Spinner />}><Store /></Suspense>} />
           <Route path="perfil" element={<Profile />} />
           <Route path="curtidas" element={<WhoLiked />} />
         </Route>
-        <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/admin/*" element={<Suspense fallback={<Spinner />}><AdminApp /></Suspense>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
