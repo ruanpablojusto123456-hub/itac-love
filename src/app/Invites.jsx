@@ -15,7 +15,7 @@ export default function Invites() {
   const [tab, setTab] = useState('received')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
-  const { data, reload } = useLive(() => api.listInvites())
+  const { data, error: invErr, reload } = useLive(() => api.listInvites())
 
   async function respond(i, accept) {
     setBusy(i.id); setError('')
@@ -31,7 +31,7 @@ export default function Invites() {
         {[['received', 'Recebidos'], ['sent', 'Enviados']].map(([id, l]) => <button key={id} onClick={() => setTab(id)} className={`py-2.5 rounded-lg font-display font-semibold ${tab === id ? 'bg-white text-primary shadow' : 'text-ink-soft'}`}>{l}{id === 'received' && data ? ` (${data.received.filter(i => i.status === 'pending').length})` : ''}</button>)}
       </div>
       <div className="mt-3"><ErrorBox>{error}</ErrorBox></div>
-      {!data ? <Spinner /> : !list.length ? (
+      {!data ? <Spinner error={invErr} onRetry={reload} /> : !list.length ? (
         <div className="text-center py-16 text-ink-soft"><Mail className="w-10 h-10 mx-auto mb-2 text-violet" />{tab === 'received' ? 'Nenhum convite recebido ainda.' : 'Você ainda não enviou convites. Use o botão ✉ no feed.'}</div>
       ) : (
         <ul className="mt-4 space-y-3">{list.map(i => (

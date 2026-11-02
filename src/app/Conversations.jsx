@@ -7,9 +7,9 @@ import { api } from '../lib/api'
 import { formatLeft, useLive, useNow } from '../lib/hooks'
 
 function ConversationList({ activeId }) {
-  const { data } = useLive(() => api.listConversations())
+  const { data, error, reload } = useLive(() => api.listConversations())
   const now = useNow(30000)
-  if (!data) return <Spinner />
+  if (!data) return <Spinner error={error} onRetry={reload} />
   const matches = data.filter(c => c.match_id && !c.first_message_at)
   const chats = data.filter(c => !(c.match_id && !c.first_message_at))
   return (

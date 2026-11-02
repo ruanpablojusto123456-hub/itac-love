@@ -131,7 +131,8 @@ export default function Feed() {
   const blurred = useScreenProtection()
 
   const load = useCallback(async () => {
-    try { const [l, qs] = await Promise.all([api.getFeed(filters), api.quotaStatus()]); setList(l); setQ(qs) } catch (e) { setError(friendlyError(e)) }
+    try { setList(await api.getFeed(filters)) } catch (e) { setList([]); setError(friendlyError(e)) }
+    api.quotaStatus().then(setQ).catch(() => {})
   }, [filters])
   useEffect(() => { load() }, [load])
   useEffect(() => { api.getMyPhotos().then(p => setMyPhoto(p[0]?.path)) }, [])
