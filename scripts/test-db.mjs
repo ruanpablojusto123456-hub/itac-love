@@ -21,7 +21,7 @@ grant usage on schema public, auth, storage, extensions to anon, authenticated, 
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 `)
-for (const f of ['0001_schema.sql', '0002_functions.sql', '0003_policies.sql', '0005_media_prompts_vip.sql']) {
+for (const f of ['0001_schema.sql', '0002_functions.sql', '0003_policies.sql', '0005_media_prompts_vip.sql', '0006_chat_reply_delete.sql']) {
   await db.exec(fs.readFileSync(new URL(`../supabase/migrations/${f}`, import.meta.url), 'utf8'))
   console.log('✅ migração', f)
 }
@@ -158,6 +158,19 @@ ok(w1.count === 1 && w1.people.length === 0 && !w1.vip, 'sem VIP: vê só quanta
 await q(`update profiles set vip_until = now() + interval '30 days' where id=$1`, [carla2])
 const w2 = (await as(carla2, () => q(`select who_liked_me() w`)))[0].w
 ok(w2.vip && w2.people.length === 1 && w2.people[0].name === 'Bruno', 'com VIP: vê quem curtiu')
+
+// v1.2: responder e apagar mensagens
+const orig = (await q(`select id from messages where body='Oi, Bruno!'`))[0].id
+await as(bruno, () => q(`insert into messages(conversation_id, sender_id, body, reply_to) values ($1,$2,'Oi Ana! Respondendo',$3)`, [conv, bruno, orig]))
+ok((await q(`select reply_to from messages where body='Oi Ana! Respondendo'`))[0].reply_to === orig, 'resposta guarda a mensagem citada')
+const rep2 = (await q(`select id from messages where body='Oi Ana! Respondendo'`))[0].id
+await expectErr(as(ana, () => q(`select delete_message($1, true)`, [rep2])), 'SO_QUEM_ENVIOU', 'só quem enviou apaga para todos')
+await as(ana, () => q(`select delete_message($1, false)`, [rep2]))
+ok((await q(`select $1 = any(hidden_for) h from messages where id=$2`, [ana, rep2]))[0].h, 'apagar para mim esconde só para quem apagou')
+await as(bruno, () => q(`select delete_message($1, true)`, [rep2]))
+const del = (await q(`select deleted_for_all, body from messages where id=$1`, [rep2]))[0]
+ok(del.deleted_for_all && del.body === '', 'apagar para todos remove o conteúdo do servidor')
+ok((await as(bruno, () => q(`select last_body from my_conversations() where conversation_id=$1`, [conv])))[0].last_body === '🚫 Mensagem apagada', 'lista mostra "Mensagem apagada"')
 
 // expiração de match
 await as(carla, () => q(`select like_profile($1,'like')`, [ana]))
