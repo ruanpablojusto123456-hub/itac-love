@@ -9,6 +9,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Se chegar um envio novo, cancela a compilação anterior que ainda estiver rodando
+concurrency:
+  group: build-itac-love
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pages: write
