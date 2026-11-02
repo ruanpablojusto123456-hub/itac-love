@@ -1,8 +1,7 @@
 # Gera o APK Android e publica a versão web no GitHub Pages a cada push na branch main.
 # Configure em Settings > Secrets and variables > Actions:
 #   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY            (obrigatórios para o modo real)
-#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
-#   ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD              (opcionais: APK assinado de produção)
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD   (assinatura fixa do APK; alias padrão: itaclove)
 name: Build ITAC LOVE
 
 on:
@@ -47,7 +46,7 @@ jobs:
             BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
             $BT/zipalign -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
             $BT/apksigner sign --ks release.keystore --ks-pass pass:${{ secrets.ANDROID_KEYSTORE_PASSWORD }} \
-              --ks-key-alias ${{ secrets.ANDROID_KEY_ALIAS }} --key-pass pass:${{ secrets.ANDROID_KEY_PASSWORD }} \
+              --ks-key-alias ${{ secrets.ANDROID_KEY_ALIAS || 'itaclove' }} --key-pass pass:${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }} \
               --out ../itac-love.apk aligned.apk
           else
             ./gradlew assembleDebug
