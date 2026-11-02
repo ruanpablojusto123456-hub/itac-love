@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { Bell, EyeOff, Heart, LogOut, MapPin, PauseCircle, ShoppingBag, Trash2, PartyPopper, ChevronRight, Crown, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLive } from '../lib/hooks'
+import PromptsEditor from './PromptsEditor'
+import { getThemePref, setThemePref } from '../lib/theme'
+import { Sun, Moon, Smartphone } from 'lucide-react'
 import { Button, Card, Logo, VerifiedBadge } from '../components/ui'
 import PhotoImg from '../components/PhotoImg'
 import { api } from '../lib/api'
@@ -24,6 +27,7 @@ export default function Profile() {
   const [tags, setTags] = useState([])
   const [welcome, setWelcome] = useState(false)
   const [del, setDel] = useState(0)
+  const [theme, setTheme] = useState(getThemePref)
   const { data: quota } = useLive(() => api.quotaStatus())
   const { data: notes } = useLive(() => api.listNotifications())
 
@@ -38,7 +42,7 @@ export default function Profile() {
 
   return (
     <div className="pb-10">
-      <header className="bg-white/80 backdrop-blur sticky top-0 z-10 border-b border-surface-highest">
+      <header className="bg-card/80 backdrop-blur sticky top-0 z-10 border-b border-surface-highest">
         <div className="max-w-xl mx-auto px-4 py-2 flex items-center justify-between">
           <Logo className="w-24 lg:hidden" /><h1 className="hidden lg:block text-[24px] font-bold">Meu perfil</h1>
           <button onClick={() => api.signOut()} className="inline-flex items-center gap-1.5 text-ink-soft font-semibold text-[14px]"><LogOut className="w-4 h-4" />Sair</button>
@@ -61,7 +65,10 @@ export default function Profile() {
           </div>
         </Card>
 
+        <PromptsEditor initial={profile.prompts || []} onSaved={refresh} />
+
         <Card className="divide-y divide-surface-highest overflow-hidden">
+          <Link to="/app/curtidas" className="flex items-center gap-3 p-4 hover:bg-surface-low"><Heart className="w-5 h-5 text-secondary" /><span className="flex-1"><b className="block">Quem curtiu você</b><span className="text-[13px] text-ink-soft">Benefício do ITAC VIP</span></span><ChevronRight className="w-5 h-5 text-ink-mute" /></Link>
           <Link to="/app/loja" className="flex items-center gap-3 p-4 hover:bg-surface-low"><ShoppingBag className="w-5 h-5 text-violet" /><span className="flex-1"><b className="block">Loja e histórico de compras</b><span className="text-[13px] text-ink-soft">{quota ? (quota.likes_unlimited ? 'Curtidas ilimitadas' : `${quota.likes_left} curtidas e ${quota.invites_left} convites hoje`) : ''}{profile.vip_until && new Date(profile.vip_until) > new Date() ? ' · VIP ativo' : ''}</span></span>{profile.vip_until && new Date(profile.vip_until) > new Date() && <Crown className="w-5 h-5 text-amber" />}<ChevronRight className="w-5 h-5 text-ink-mute" /></Link>
           <Link to="/termos" className="flex items-center gap-3 p-4 hover:bg-surface-low"><FileText className="w-5 h-5 text-primary" /><b className="flex-1">Termos de Uso</b><ChevronRight className="w-5 h-5 text-ink-mute" /></Link>
           <Link to="/privacidade" className="flex items-center gap-3 p-4 hover:bg-surface-low"><FileText className="w-5 h-5 text-primary" /><b className="flex-1">Política de Privacidade (LGPD)</b><ChevronRight className="w-5 h-5 text-ink-mute" /></Link>
@@ -72,6 +79,15 @@ export default function Profile() {
           {!notes?.length ? <p className="text-[14px] text-ink-soft mt-2">Nenhuma notificação.</p> : (
             <ul className="mt-2 divide-y divide-surface-highest">{notes.slice(0, 8).map(n => (
               <li key={n.id} className="py-2.5"><b className="text-[14px]">{n.title}</b><p className="text-[13px] text-ink-soft">{n.body}</p><span className="text-[11px] text-ink-mute">{new Date(n.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></li>))}</ul>)}
+        </Card>
+
+        <Card className="p-5">
+          <div className="font-display font-semibold text-[18px]">Aparência</div>
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            {[['light', 'Claro', Sun], ['dark', 'Escuro', Moon], ['system', 'Automático', Smartphone]].map(([id, l, I]) => (
+              <button key={id} onClick={() => { setTheme(id); setThemePref(id) }} aria-pressed={theme === id}
+                className={`flex flex-col items-center gap-1.5 rounded-2xl border-2 py-3 text-[14px] font-semibold transition ${theme === id ? 'border-primary bg-primary-fixed/50 text-primary' : 'border-transparent bg-surface-low text-ink-soft'}`}><I className="w-5 h-5" />{l}</button>))}
+          </div>
         </Card>
 
         <Card className="p-5 divide-y divide-surface-highest">

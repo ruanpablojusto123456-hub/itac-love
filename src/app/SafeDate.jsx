@@ -11,7 +11,7 @@ const pad = (n) => String(n).padStart(2, '0')
 const localInput = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 const fmt = (iso) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 const STATUS = {
-  scheduled: ['Agendado', 'bg-primary-fixed text-primary'], checkin_sent: ['Aguardando check-in', 'bg-amber/20 text-[#7a4d00]'],
+  scheduled: ['Agendado', 'bg-primary-fixed text-primary'], checkin_sent: ['Aguardando check-in', 'bg-amber/20 text-amber-ink'],
   ok: ['Tudo bem ✓', 'bg-tertiary-fixed/50 text-tertiary'], help: ['Pediu ajuda — contatos avisados', 'bg-secondary text-white'],
   alerted: ['Sem resposta — contatos avisados', 'bg-secondary text-white'], cancelled: ['Cancelado', 'bg-surface-mid text-ink-soft'],
 }
@@ -67,7 +67,7 @@ export default function SafeDate() {
       <p className="mt-3 rounded-xl bg-surface-mid px-4 py-2.5 text-[13px] text-ink-soft flex gap-2"><EyeOff className="w-4 h-4 shrink-0 mt-0.5" />{conv.other.name} <b>não</b> é avisado(a) de que o modo seguro foi ativado.</p>
 
       {created ? (
-        <div className="mt-5 bg-white rounded-2xl p-5 shadow-sm">
+        <div className="mt-5 bg-card rounded-2xl p-5 shadow-sm">
           <div className="flex items-center gap-2 text-tertiary font-bold"><Check className="w-5 h-5" />Encontro registrado</div>
           <p className="text-[14px] mt-2">Seus {contacts.length} contato(s) receberam por SMS/WhatsApp um link com local, horário e a foto de {conv.other.name}.{isDemo && ' (Na demonstração o envio é simulado.)'}</p>
           <p className="text-[14px] mt-2">No horário de término ({fmt(created.ends_at)}) vamos perguntar <b>"Está tudo bem?"</b>. Sem resposta em 30 minutos, ou se você tocar em "Preciso de ajuda", seus contatos são avisados com sua última localização.</p>
@@ -79,7 +79,7 @@ export default function SafeDate() {
           {geoMsg && <p className="text-[13px] mt-2 text-ink-soft">{geoMsg}</p>}
         </div>
       ) : (<>
-        <section className="mt-5 bg-white rounded-2xl p-5 shadow-sm space-y-4">
+        <section className="mt-5 bg-card rounded-2xl p-5 shadow-sm space-y-4">
           <div className="flex items-center gap-3"><PhotoImg path={conv.other.photos?.[0]} className="w-12 h-12 rounded-full object-cover" alt="" /><div><div className="text-[12px] text-ink-soft">Com quem você vai</div><b>{conv.other.name}, {conv.other.age}</b></div></div>
           <label className="block"><span className="label">Local</span>
             <div className="relative"><MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-mute" /><input id="sd-place" className="field pl-12" value={f.place} onChange={e => setF({ ...f, place: e.target.value })} placeholder="Ex.: Praça da Matriz, Itacarambi" /></div></label>
@@ -89,7 +89,7 @@ export default function SafeDate() {
           </div>
         </section>
 
-        <section className="mt-4 bg-white rounded-2xl p-5 shadow-sm">
+        <section className="mt-4 bg-card rounded-2xl p-5 shadow-sm">
           <h2 className="font-display font-semibold text-[18px]">Contatos de confiança</h2>
           <p className="text-[13px] text-ink-soft">Recebem o link do encontro e os alertas por SMS ou WhatsApp.</p>
           <ul className="mt-3 space-y-2">{contacts.map(ct => (
@@ -110,7 +110,7 @@ export default function SafeDate() {
         <section className="mt-6">
           <h2 className="text-[13px] font-bold uppercase tracking-wide text-ink-soft mb-2">Encontros com {conv.other.name}</h2>
           <ul className="space-y-2">{mine.map(d => (
-            <li key={d.id} className="bg-white rounded-2xl p-4 shadow-sm">
+            <li key={d.id} className="bg-card rounded-2xl p-4 shadow-sm">
               <div className="flex justify-between gap-2"><b>{d.place}</b><span className={`rounded-full px-2.5 py-0.5 text-[12px] font-bold h-fit ${STATUS[d.status][1]}`}>{STATUS[d.status][0]}</span></div>
               <div className="text-[13px] text-ink-soft">{fmt(d.starts_at)} até {fmt(d.ends_at)}</div>
               {['scheduled', 'checkin_sent'].includes(d.status) && <div className="flex gap-2 mt-3">

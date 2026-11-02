@@ -16,8 +16,8 @@ function CheckinModal() {
   const due = data?.find(d => d.status === 'checkin_sent')
   if (!due) return null
   return (
-    <div className="fixed inset-0 z-[60] bg-ink/70 flex items-center justify-center px-4">
-      <div className="bg-white rounded-3xl p-6 max-w-sm w-full text-center animate-pop">
+    <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center px-4">
+      <div className="bg-card rounded-3xl p-6 max-w-sm w-full text-center animate-pop">
         <HeartHandshake className="w-14 h-14 text-primary mx-auto" />
         <h2 className="text-[26px] font-extrabold mt-3">Está tudo bem?</h2>
         <p className="text-ink-soft mt-1 text-[15px]">Seu encontro com <b>{due.partner_name}</b> em {due.place} deveria ter terminado. Se não responder em 30 minutos, avisaremos seus contatos de confiança.</p>
@@ -46,7 +46,7 @@ export default function AppShell() {
   return (
     <div className="min-h-screen lg:flex">
       {/* Navegação lateral (computador) */}
-      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-surface-highest bg-white sticky top-0 h-screen">
+      <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-surface-highest bg-card sticky top-0 h-screen">
         <div className="p-5"><Logo className="w-36" /></div>
         <nav className="flex flex-col gap-1 px-3">
           {items.map(([to, label, I, n]) => (
@@ -63,7 +63,7 @@ export default function AppShell() {
 
       {/* Barra inferior (celular) */}
       {!inChat && (
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-surface-highest safe-bottom">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur border-t border-surface-highest safe-bottom">
           <div className="max-w-xl mx-auto grid grid-cols-4">
             {items.map(([to, label, I, n]) => (
               <NavLink key={to} to={to} className={({ isActive }) => `flex flex-col items-center gap-0.5 pt-2.5 pb-1 text-[11px] font-bold ${isActive ? 'text-secondary' : 'text-ink-mute'}`}>

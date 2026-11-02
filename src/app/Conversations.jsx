@@ -36,7 +36,7 @@ function ConversationList({ activeId }) {
       {!chats.length ? <p className="text-ink-soft text-[14px] py-6 text-center">{matches.length ? 'Abra um match acima e mande a primeira mensagem.' : 'Nenhuma conversa ainda. Curta perfis no Descobrir ou aceite convites.'}</p> : (
         <ul className="space-y-1">{chats.map(c => (
           <li key={c.conversation_id}>
-            <Link to={`/app/conversas/${c.conversation_id}`} className={`flex items-center gap-3 rounded-2xl p-2.5 transition ${activeId === c.conversation_id ? 'bg-secondary-fixed/50' : 'hover:bg-white'}`}>
+            <Link to={`/app/conversas/${c.conversation_id}`} className={`flex items-center gap-3 rounded-2xl p-2.5 transition ${activeId === c.conversation_id ? 'bg-secondary-fixed/50' : 'hover:bg-card'}`}>
               <PhotoImg path={c.other_photo} className="w-14 h-14 rounded-full object-cover shrink-0 no-select" alt="" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1"><b className="truncate">{c.other_name}</b>{c.other_verified && <BadgeCheck className="w-4 h-4 text-tertiary shrink-0" />}{c.self_destruct_seconds && <Timer className="w-4 h-4 text-violet shrink-0" aria-label="Autodestruição ativa" />}</div>

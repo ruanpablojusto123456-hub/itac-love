@@ -8,7 +8,7 @@ import { api } from '../lib/api'
 import { useLive } from '../lib/hooks'
 import { friendlyError } from '../lib/constants'
 
-const STATUS = { pending: ['Aguardando', 'bg-amber/20 text-[#7a4d00]'], accepted: ['Aceito', 'bg-tertiary-fixed/50 text-tertiary'], declined: ['Recusado', 'bg-surface-mid text-ink-soft'], cancelled: ['Cancelado', 'bg-surface-mid text-ink-soft'] }
+const STATUS = { pending: ['Aguardando', 'bg-amber/20 text-amber-ink'], accepted: ['Aceito', 'bg-tertiary-fixed/50 text-tertiary'], declined: ['Recusado', 'bg-surface-mid text-ink-soft'], cancelled: ['Cancelado', 'bg-surface-mid text-ink-soft'] }
 
 export default function Invites() {
   const nav = useNavigate()
@@ -28,14 +28,14 @@ export default function Invites() {
       <h1 className="text-[28px] font-bold">Convites</h1>
       <p className="text-ink-soft text-[14px]">Convites abrem um chat sem precisar de match, se a outra pessoa aceitar.</p>
       <div className="grid grid-cols-2 bg-surface-mid rounded-xl p-1 mt-4">
-        {[['received', 'Recebidos'], ['sent', 'Enviados']].map(([id, l]) => <button key={id} onClick={() => setTab(id)} className={`py-2.5 rounded-lg font-display font-semibold ${tab === id ? 'bg-white text-primary shadow' : 'text-ink-soft'}`}>{l}{id === 'received' && data ? ` (${data.received.filter(i => i.status === 'pending').length})` : ''}</button>)}
+        {[['received', 'Recebidos'], ['sent', 'Enviados']].map(([id, l]) => <button key={id} onClick={() => setTab(id)} className={`py-2.5 rounded-lg font-display font-semibold ${tab === id ? 'bg-card text-primary shadow' : 'text-ink-soft'}`}>{l}{id === 'received' && data ? ` (${data.received.filter(i => i.status === 'pending').length})` : ''}</button>)}
       </div>
       <div className="mt-3"><ErrorBox>{error}</ErrorBox></div>
       {!data ? <Spinner error={invErr} onRetry={reload} /> : !list.length ? (
         <div className="text-center py-16 text-ink-soft"><Mail className="w-10 h-10 mx-auto mb-2 text-violet" />{tab === 'received' ? 'Nenhum convite recebido ainda.' : 'Você ainda não enviou convites. Use o botão ✉ no feed.'}</div>
       ) : (
         <ul className="mt-4 space-y-3">{list.map(i => (
-          <li key={i.id} className="bg-white rounded-2xl shadow-sm p-4 flex gap-4">
+          <li key={i.id} className="bg-card rounded-2xl shadow-sm p-4 flex gap-4">
             <PhotoImg path={i.other.photos?.[0]} className="w-20 h-24 rounded-xl object-cover shrink-0 no-select" alt="" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap"><b className="text-[17px]">{i.other.name}, {i.other.age}</b>{i.other.verified && <BadgeCheck className="w-5 h-5 text-tertiary" />}</div>

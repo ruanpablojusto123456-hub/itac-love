@@ -42,19 +42,19 @@ function SwipeCard({ p, onDecide, onOpen, blurred }) {
   }
   return (
     <div onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-      className="absolute inset-0 rounded-[28px] overflow-hidden shadow-2xl bg-white touch-pan-y cursor-grab active:cursor-grabbing"
+      className="absolute inset-0 rounded-[28px] overflow-hidden shadow-2xl bg-card touch-pan-y cursor-grab active:cursor-grabbing"
       style={{ transform: `translateX(${dx}px) rotate(${dx / 18}deg)`, transition: drag ? 'none' : 'transform .25s ease' }}>
       <PhotoCarousel photos={p.photos} blurred={blurred} className="absolute inset-0" />
-      <div className="absolute top-5 left-5 z-20 border-4 border-tertiary-green text-tertiary-green font-display font-extrabold text-[30px] px-3 rounded-xl rotate-[-14deg] bg-white/70" style={{ opacity: Math.max(0, Math.min(1, dx / 100)) }}>CURTIR</div>
-      <div className="absolute top-5 right-5 z-20 border-4 border-secondary text-secondary font-display font-extrabold text-[30px] px-3 rounded-xl rotate-[14deg] bg-white/70" style={{ opacity: Math.max(0, Math.min(1, -dx / 100)) }}>PASSAR</div>
+      <div className="absolute top-5 left-5 z-20 border-4 border-tertiary-green text-tertiary-green font-display font-extrabold text-[30px] px-3 rounded-xl rotate-[-14deg] bg-card/70" style={{ opacity: Math.max(0, Math.min(1, dx / 100)) }}>CURTIR</div>
+      <div className="absolute top-5 right-5 z-20 border-4 border-secondary text-secondary font-display font-extrabold text-[30px] px-3 rounded-xl rotate-[14deg] bg-card/70" style={{ opacity: Math.max(0, Math.min(1, -dx / 100)) }}>PASSAR</div>
       <div className="absolute top-5 right-4 z-20" style={{ opacity: dx < -10 ? 0 : 1 }}><AffinityBadge value={p.affinity} /></div>
       <div className="absolute inset-x-0 bottom-0 z-20 p-5 pt-24 bg-gradient-to-t from-black/85 via-black/45 to-transparent text-white pointer-events-none">
-        <div className="flex items-center gap-2"><h2 className="text-[30px] font-bold leading-none">{p.name}, {p.age}</h2>{p.verified && <BadgeCheck className="w-7 h-7 text-tertiary-fixed" aria-label="Verificado" />}</div>
+        <div className="flex items-center gap-2"><h2 className="text-[30px] font-bold leading-none">{p.name}, {p.age}</h2>{p.verified && <BadgeCheck className="w-7 h-7 text-mint" aria-label="Verificado" />}</div>
         <div className="flex items-center gap-1 text-[14px] mt-1 opacity-90"><MapPin className="w-4 h-4" />{p.city}{p.distance_km != null ? ` · a ${p.distance_km} km` : ''}</div>
         <p className="text-[14px] mt-2 line-clamp-2 opacity-90">{p.bio}</p>
         <div className="mt-3"><TagList tags={p.tags} common={p.common_tags} max={5} /></div>
       </div>
-      <button onClick={onOpen} aria-label="Ver perfil completo" className="absolute bottom-5 right-5 z-30 w-10 h-10 rounded-full bg-white/90 text-ink flex items-center justify-center"><Info className="w-5 h-5" /></button>
+      <button onClick={onOpen} aria-label="Ver perfil completo" className="absolute bottom-5 right-5 z-30 w-10 h-10 rounded-full bg-card/90 text-ink flex items-center justify-center"><Info className="w-5 h-5" /></button>
     </div>
   )
 }
@@ -64,8 +64,8 @@ function FiltersSheet({ value, onApply, onClose }) {
   const [f, setF] = useState({ minAge: 18, maxAge: 60, maxKm: null, genders: [], looking: [], tags: [], ...value })
   const tog = (k, v) => setF(s => ({ ...s, [k]: s[k].includes(v) ? s[k].filter(x => x !== v) : [...s[k], v] }))
   return (
-    <div className="fixed inset-0 z-50 bg-ink/50 flex items-end sm:items-center justify-center" onClick={onClose}>
-      <div className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col animate-pop" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="bg-card w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col animate-pop" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center px-5 py-4 border-b border-surface-highest"><h2 className="text-[20px] font-bold">Filtros</h2><button onClick={onClose} aria-label="Fechar"><X className="w-6 h-6" /></button></div>
         <div className="overflow-y-auto p-5 space-y-6">
           <section><span className="label">Idade: {f.minAge} a {f.maxAge} anos</span>
@@ -104,7 +104,7 @@ export function MatchOverlay({ match, me, onClose }) {
       <p className="opacity-90 relative">Você e {match.other.name} se curtiram 💘</p>
       <div className="flex items-center mt-8 relative animate-pop">
         <PhotoImg path={me.photo} className="w-32 h-32 rounded-full object-cover border-4 border-white -rotate-6 shadow-xl" alt="" />
-        <div className="w-14 h-14 -mx-4 z-10 rounded-full bg-white flex items-center justify-center shadow-lg"><Heart className="w-8 h-8 text-secondary fill-secondary" /></div>
+        <div className="w-14 h-14 -mx-4 z-10 rounded-full bg-card flex items-center justify-center shadow-lg"><Heart className="w-8 h-8 text-secondary fill-secondary" /></div>
         <PhotoImg path={match.other.photos?.[0]} className="w-32 h-32 rounded-full object-cover border-4 border-white rotate-6 shadow-xl" alt="" />
       </div>
       <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 font-semibold relative"><Clock className="w-5 h-5" />O chat expira em {formatLeft(new Date(match.expires_at) - now)} se ninguém mandar mensagem</div>
@@ -128,6 +128,7 @@ export default function Feed() {
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
   const [myPhoto, setMyPhoto] = useState(null)
+  const [likedCount, setLikedCount] = useState(0)
   const blurred = useScreenProtection()
 
   const load = useCallback(async () => {
@@ -135,7 +136,7 @@ export default function Feed() {
     api.quotaStatus().then(setQ).catch(() => {})
   }, [filters])
   useEffect(() => { load() }, [load])
-  useEffect(() => { api.getMyPhotos().then(p => setMyPhoto(p[0]?.path)) }, [])
+  useEffect(() => { api.getMyPhotos().then(p => setMyPhoto(p[0]?.path)); api.whoLikedMe().then(w => setLikedCount(w.count)).catch(() => {}) }, [])
   const flash = (m) => { setToast(m); setTimeout(() => setToast(''), 2600) }
 
   const top = list?.[0]
@@ -165,11 +166,12 @@ export default function Feed() {
       <header className="flex items-center justify-between gap-2">
         <Logo className="w-24 lg:hidden" /><h1 className="hidden lg:block text-[28px] font-bold">Descobrir</h1>
         <div className="flex items-center gap-2">
+          <Link to="/app/curtidas" aria-label="Quem curtiu você" className="relative w-11 h-11 rounded-full bg-card shadow-sm flex items-center justify-center text-secondary"><Heart className="w-5 h-5 fill-secondary" />{likedCount > 0 && <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-violet text-white text-[11px] font-bold flex items-center justify-center">{likedCount > 9 ? '9+' : likedCount}</span>}</Link>
           <QuotaChip q={q} />
-          <button onClick={() => setShowFilters(true)} aria-label="Filtros" className="relative w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center"><SlidersHorizontal className="w-5 h-5" />{Object.values(filters).some(v => (Array.isArray(v) ? v.length : v)) && <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-secondary" />}</button>
+          <button onClick={() => setShowFilters(true)} aria-label="Filtros" className="relative w-11 h-11 rounded-full bg-card shadow-sm flex items-center justify-center"><SlidersHorizontal className="w-5 h-5" />{Object.values(filters).some(v => (Array.isArray(v) ? v.length : v)) && <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-secondary" />}</button>
         </div>
       </header>
-      {profile.paused && <div className="mt-3 rounded-xl bg-amber/20 text-[#7a4d00] text-[14px] font-semibold px-4 py-2.5">Sua conta está pausada: você não aparece no feed nem pode curtir. <Link to="/app/perfil" className="underline">Reativar</Link></div>}
+      {profile.paused && <div className="mt-3 rounded-xl bg-amber/20 text-amber-ink text-[14px] font-semibold px-4 py-2.5">Sua conta está pausada: você não aparece no feed nem pode curtir. <Link to="/app/perfil" className="underline">Reativar</Link></div>}
       {error && <div className="mt-3"><ErrorBox>{error}{/acabaram/.test(error) && <Link to="/app/loja" className="ml-1 underline">Comprar mais</Link>}</ErrorBox></div>}
 
       <div className="relative mt-3 h-[clamp(360px,calc(100dvh-300px),620px)] lg:h-[clamp(420px,calc(100dvh-230px),640px)]">
@@ -188,16 +190,16 @@ export default function Feed() {
 
       {top && (
         <div className="flex items-center justify-center gap-5 mt-4 pb-3">
-          <button onClick={() => decide('pass')} aria-label="Passar" className="w-16 h-16 rounded-full bg-white shadow-lg text-secondary flex items-center justify-center active:scale-90 transition"><X className="w-8 h-8" strokeWidth={3} /></button>
-          <button onClick={() => setInvite(top)} aria-label="Enviar convite" className="w-12 h-12 rounded-full bg-white shadow-lg text-violet flex items-center justify-center active:scale-90 transition"><Mail className="w-6 h-6" /></button>
+          <button onClick={() => decide('pass')} aria-label="Passar" className="w-16 h-16 rounded-full bg-card shadow-lg text-secondary flex items-center justify-center active:scale-90 transition"><X className="w-8 h-8" strokeWidth={3} /></button>
+          <button onClick={() => setInvite(top)} aria-label="Enviar convite" className="w-12 h-12 rounded-full bg-card shadow-lg text-violet flex items-center justify-center active:scale-90 transition"><Mail className="w-6 h-6" /></button>
           <button onClick={() => decide('like')} aria-label="Curtir" className="w-16 h-16 rounded-full bg-secondary shadow-lg shadow-secondary/30 text-white flex items-center justify-center active:scale-90 transition"><Heart className="w-8 h-8 fill-white" /></button>
         </div>
       )}
       <p className="hidden lg:block text-center text-[12px] text-ink-mute pb-6">Dica: arraste o cartão com o mouse ou use as setas ← → do teclado.</p>
 
       {open && (
-        <div className="fixed inset-0 z-40 bg-ink/50 flex items-end sm:items-center justify-center" onClick={() => setOpen(null)}>
-          <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto animate-pop" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-40 bg-black/50 flex items-end sm:items-center justify-center" onClick={() => setOpen(null)}>
+          <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto animate-pop" onClick={e => e.stopPropagation()}>
             <ProfileDetails p={open} blurred={blurred} actions={<>
               <div className="grid grid-cols-3 gap-2 pt-2">
                 <Button variant="soft" onClick={() => decide('pass', open)}><X className="w-5 h-5" />Passar</Button>
@@ -213,8 +215,8 @@ export default function Feed() {
         </div>
       )}
       {invite && (
-        <div className="fixed inset-0 z-50 bg-ink/50 flex items-end sm:items-center justify-center" onClick={() => setInvite(null)}>
-          <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 animate-pop safe-bottom" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center" onClick={() => setInvite(null)}>
+          <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 animate-pop safe-bottom" onClick={e => e.stopPropagation()}>
             <h2 className="text-[20px] font-bold flex items-center gap-2"><Mail className="w-5 h-5 text-violet" />Convite para {invite.name}</h2>
             <p className="text-[14px] text-ink-soft mt-1">Sem precisar de match: o chat abre se a pessoa aceitar.{q && !q.invites_unlimited && <> Você tem <b>{q.invites_left + (q.extra_invites || 0)}</b> convite(s) hoje.</>}</p>
             <textarea id="invite-msg" className="field mt-3" rows={3} maxLength={300} value={inviteMsg} onChange={e => setInviteMsg(e.target.value)} placeholder={`Oi, ${invite.name}! Vi que a gente curte…`} />
@@ -225,7 +227,7 @@ export default function Feed() {
       {showFilters && <FiltersSheet value={filters} onClose={() => setShowFilters(false)} onApply={(f) => { setFilters(f); saveFilters(f); setShowFilters(false) }} />}
       <MatchOverlay match={match} me={{ photo: myPhoto }} onClose={() => setMatch(null)} />
       <ReportBlockSheet mode={sheet} person={open} onClose={() => setSheet(null)} onBlocked={() => { setList(l => l.filter(x => x.id !== open?.id)); setOpen(null) }} />
-      {toast && <div className="fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 rounded-full bg-ink text-white px-5 py-3 text-[14px] font-semibold shadow-xl animate-pop">{toast}</div>}
+      {toast && <div className="fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 rounded-full bg-night text-white px-5 py-3 text-[14px] font-semibold shadow-xl animate-pop">{toast}</div>}
       {q && !q.likes_unlimited && q.likes_left + (q.extra_likes || 0) === 0 && top && (
         <Link to="/app/loja" className="fixed bottom-24 lg:bottom-8 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-violet text-white px-4 py-3 font-semibold shadow-xl"><ShoppingBag className="w-5 h-5" />Mais curtidas</Link>
       )}

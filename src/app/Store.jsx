@@ -39,7 +39,7 @@ export default function Store() {
   const products = [
     ['likes_pack', `${s.likes_pack_size} curtidas extras`, 'Somam ao seu saldo e não expiram à meia-noite.', s.price_likes_pack_cents, Heart, 'text-secondary bg-secondary-fixed/60'],
     ['invites_pack', `${s.invites_pack_size} convites extras`, 'Converse sem precisar de match.', s.price_invites_pack_cents, Mail, 'text-violet bg-violet/10'],
-    ['vip_month', 'ITAC VIP — 30 dias', 'Curtidas e convites ilimitados durante 30 dias.', s.price_vip_month_cents, Crown, 'text-amber bg-amber/15'],
+    ['vip_month', 'ITAC VIP — 30 dias', 'Veja quem curtiu você + curtidas e convites ilimitados por 30 dias.', s.price_vip_month_cents, Crown, 'text-amber bg-amber/15'],
   ]
   const paid = pay?.status === 'paid'
 
@@ -50,7 +50,7 @@ export default function Store() {
       {q && <p className="text-ink-soft text-[14px]">Hoje você tem: <b>{q.likes_unlimited ? 'curtidas ilimitadas' : `${q.likes_left} curtidas`}</b>{!q.likes_unlimited && q.extra_likes ? ` + ${q.extra_likes} extras` : ''} · <b>{q.invites_unlimited ? 'convites ilimitados' : `${q.invites_left} convites`}</b>{!q.invites_unlimited && q.extra_invites ? ` + ${q.extra_invites} extras` : ''}. A cota diária renova à meia-noite.</p>}
 
       {pay ? (
-        <div className="mt-5 bg-white rounded-2xl p-5 shadow-sm text-center">
+        <div className="mt-5 bg-card rounded-2xl p-5 shadow-sm text-center">
           {paid ? (<>
             <CheckCircle2 className="w-16 h-16 text-tertiary mx-auto" />
             <h2 className="text-[22px] font-bold mt-2">Pagamento confirmado!</h2>
@@ -69,7 +69,7 @@ export default function Store() {
         </div>
       ) : (
         <ul className="mt-5 space-y-3">{products.map(([id, title, desc, price, I, tone]) => (
-          <li key={id} className="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-4">
+          <li key={id} className="bg-card rounded-2xl p-4 shadow-sm flex items-center gap-4">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${tone}`}><I className="w-6 h-6" /></div>
             <div className="flex-1 min-w-0"><b className="block">{title}</b><span className="text-[13px] text-ink-soft">{desc}</span></div>
             <Button variant={id === 'vip_month' ? 'love' : 'ocean'} className="!px-4 !py-2.5 shrink-0" loading={busy === id} onClick={() => buy(id)}>{brl(price)}</Button>
@@ -79,7 +79,7 @@ export default function Store() {
 
       <h2 className="text-[13px] font-bold uppercase tracking-wide text-ink-soft mt-8 mb-2">Histórico de compras</h2>
       {!history?.length ? <p className="text-[14px] text-ink-soft">Nenhuma compra ainda.</p> : (
-        <ul className="bg-white rounded-2xl shadow-sm divide-y divide-surface-highest">{history.map(p => (
+        <ul className="bg-card rounded-2xl shadow-sm divide-y divide-surface-highest">{history.map(p => (
           <li key={p.id} className="flex justify-between px-4 py-3 text-[14px]"><span>{{ likes_pack: 'Curtidas extras', invites_pack: 'Convites extras', vip_month: 'ITAC VIP' }[p.product]}<span className="block text-[12px] text-ink-soft">{new Date(p.paid_at || p.created_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></span><b className="tabular-nums">{brl(p.amount_cents)}</b></li>))}</ul>
       )}
     </div>
