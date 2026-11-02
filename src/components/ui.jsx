@@ -1,4 +1,5 @@
-import { ArrowLeft, Loader2, BadgeCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowLeft, Loader2, BadgeCheck, RefreshCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import logo from '../assets/logo.png'
 import { isDemo } from '../lib/api'
@@ -42,7 +43,18 @@ export function ErrorBox({ children }) {
   return <div role="alert" className="rounded-xl bg-secondary-fixed/60 text-secondary px-4 py-3 text-[14px] font-semibold">{children}</div>
 }
 
-export function Spinner({ label }) {
+// Carregando… e, se demorar ou der erro, mostra o motivo e um botão para tentar de novo
+export function Spinner({ label, error, onRetry }) {
+  const [slow, setSlow] = useState(false)
+  useEffect(() => { const t = setTimeout(() => setSlow(true), 12000); return () => clearTimeout(t) }, [])
+  const retry = onRetry || (() => window.location.reload())
+  if (error || slow) return (
+    <div className="flex flex-col items-center justify-center gap-3 py-16 px-6 text-center text-ink-soft">
+      <p className="font-semibold">{error ? 'Não foi possível carregar.' : 'Está demorando mais que o normal.'}</p>
+      <p className="text-[13px]">{error ? String(error.message || error) : 'Verifique sua internet e tente de novo.'}</p>
+      <button onClick={retry} className="inline-flex items-center gap-2 rounded-full bg-primary text-white font-semibold px-5 py-2.5"><RefreshCw className="w-4 h-4" />Tentar de novo</button>
+    </div>
+  )
   return <div className="flex flex-col items-center justify-center gap-3 py-16 text-ink-mute"><Loader2 className="w-8 h-8 animate-spin text-primary" />{label}</div>
 }
 
