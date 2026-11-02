@@ -18,6 +18,7 @@ import Conversations from './app/Conversations'
 import SafeDate from './app/SafeDate'
 import Store from './app/Store'
 import Profile from './app/Profile'
+import WhoLiked from './app/WhoLiked'
 import Terms from './legal/Terms'
 import Privacy from './legal/Privacy'
 import AdminApp from './admin/AdminApp'
@@ -80,6 +81,7 @@ function AppRoutes() {
           <Route path="encontro/:convId" element={<SafeDate />} />
           <Route path="loja" element={<Store />} />
           <Route path="perfil" element={<Profile />} />
+          <Route path="curtidas" element={<WhoLiked />} />
         </Route>
         <Route path="/admin/*" element={<AdminApp />} />
         <Route path="*" element={<Navigate to="/" replace />} />
