@@ -28,8 +28,8 @@ export default function ReportBlockSheet({ mode, person, conversationId, preset,
   const finish = () => { onClose(); if (mode === 'block' || alsoBlock) onBlocked?.() }
 
   return (
-    <div className="fixed inset-0 z-50 bg-ink/50 flex items-end sm:items-center justify-center" onClick={done ? finish : onClose}>
-      <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto animate-pop safe-bottom" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center" onClick={done ? finish : onClose}>
+      <div className="bg-card w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto animate-pop safe-bottom" onClick={e => e.stopPropagation()}>
         {done ? (
           <div className="text-center py-4">
             <CheckCircle2 className="w-14 h-14 text-tertiary mx-auto" />

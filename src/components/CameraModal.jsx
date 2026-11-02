@@ -52,9 +52,9 @@ export default function CameraModal({ open, guide = 'face', onClose, onCapture }
               {guide === 'selfie-doc' ? (
                 <div className="relative w-[86%] max-w-lg aspect-[4/3]">
                   <div className="absolute left-[6%] top-[8%] w-[46%] h-[78%] rounded-[50%] border-4 border-dashed border-white/80" />
-                  <div className="absolute right-[4%] top-[34%] w-[40%] h-[34%] rounded-xl border-4 border-dashed border-tertiary-fixed" />
+                  <div className="absolute right-[4%] top-[34%] w-[40%] h-[34%] rounded-xl border-4 border-dashed border-mint" />
                   <span className="absolute left-[12%] bottom-0 text-white text-[13px] font-semibold bg-black/50 rounded px-2">Seu rosto</span>
-                  <span className="absolute right-[6%] top-[70%] text-tertiary-fixed text-[13px] font-semibold bg-black/50 rounded px-2">RG ou CNH aqui</span>
+                  <span className="absolute right-[6%] top-[70%] text-mint text-[13px] font-semibold bg-black/50 rounded px-2">RG ou CNH aqui</span>
                 </div>
               ) : <div className="w-[60%] max-w-xs aspect-[3/4] rounded-[50%] border-4 border-dashed border-white/80" />}
             </div>
@@ -63,7 +63,7 @@ export default function CameraModal({ open, guide = 'face', onClose, onCapture }
       </div>
       <div className="p-6 flex flex-col items-center gap-3 safe-bottom">
         {guide === 'selfie-doc' && !error && <p className="text-white/80 text-[13px] text-center">Segure o documento ao lado do queixo, sem cobrir o rosto, com boa luz.</p>}
-        <button onClick={capture} disabled={!!error} aria-label="Tirar foto" className="w-20 h-20 rounded-full bg-white border-[6px] border-white/40 flex items-center justify-center disabled:opacity-40 active:scale-95"><CamIcon className="w-8 h-8 text-ink" /></button>
+        <button onClick={capture} disabled={!!error} aria-label="Tirar foto" className="w-20 h-20 rounded-full bg-card border-[6px] border-white/40 flex items-center justify-center disabled:opacity-40 active:scale-95"><CamIcon className="w-8 h-8 text-ink" /></button>
       </div>
     </div>
   )

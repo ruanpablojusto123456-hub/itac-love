@@ -12,8 +12,8 @@ const VARIANTS = {
   love: 'bg-secondary text-white shadow-lg shadow-secondary/25 hover:bg-secondary-container',
   ocean: 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-container',
   soft: 'bg-surface-low text-ink hover:bg-surface-mid',
-  outline: 'border-2 border-ink-line text-ink hover:bg-surface-low bg-white',
-  danger: 'bg-white border-2 border-secondary/30 text-secondary hover:bg-secondary-fixed/40',
+  outline: 'border-2 border-ink-line text-ink hover:bg-surface-low bg-card',
+  danger: 'bg-card border-2 border-secondary/30 text-secondary hover:bg-secondary-fixed/40',
   green: 'bg-tertiary text-white hover:bg-tertiary-container shadow-lg shadow-tertiary/20',
 }
 export function Button({ variant = 'love', loading, className = '', children, ...p }) {
@@ -28,14 +28,14 @@ export function Button({ variant = 'love', loading, className = '', children, ..
 export function Chip({ active, onClick, children, className = '' }) {
   return (
     <button type="button" onClick={onClick} aria-pressed={active}
-      className={`px-4 py-2 rounded-full text-[14px] font-semibold border transition ${active ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white text-ink border-ink-line/60 hover:border-primary/50'} ${className}`}>
+      className={`px-4 py-2 rounded-full text-[14px] font-semibold border transition ${active ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-card text-ink border-ink-line/60 hover:border-primary/50'} ${className}`}>
       {children}
     </button>
   )
 }
 
 export function Card({ className = '', children }) {
-  return <div className={`bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(19,27,46,.08)] ${className}`}>{children}</div>
+  return <div className={`bg-card rounded-2xl shadow-[0_4px_20px_-4px_rgba(19,27,46,.08)] ${className}`}>{children}</div>
 }
 
 export function ErrorBox({ children }) {
